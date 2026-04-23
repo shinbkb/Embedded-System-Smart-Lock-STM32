@@ -1,0 +1,9 @@
+../Core/Src/as608.c:12:13:AS608_SendCommand	2
+../Core/Src/as608.c:23:16:AS608_ReceiveResponse	3
+../Core/Src/as608.c:36:9:AS608_GetImage	1
+../Core/Src/as608.c:46:9:AS608_GenChar	1
+../Core/Src/as608.c:56:9:AS608_Search	3
+../Core/Src/as608.c:77:5:AS608_CheckFingerprint	4
+../Core/Src/as608.c:98:9:AS608_RegModel	2
+../Core/Src/as608.c:108:9:AS608_StoreChar	2
+../Core/Src/as608.c:119:5:AS608_Enroll	8
