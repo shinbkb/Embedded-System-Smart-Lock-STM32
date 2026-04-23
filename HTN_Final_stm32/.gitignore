@@ -1,0 +1,11 @@
+# Thư mục build của STM32CubeIDE
+Debug/
+Release/
+
+# Các file rác tạm thời
+*.o
+*.elf
+*.bin
+*.map
+*.hex
+.mxproject
