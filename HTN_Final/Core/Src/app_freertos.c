@@ -6,48 +6,50 @@
 #include "CLCD_I2C.h"
 #include <stdbool.h>
 #include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
 
-// --- THÊM DÒNG NÀY ĐỂ LẤY BIẾN I2C TỪ MAIN ---
 extern I2C_HandleTypeDef hi2c1;
 volatile bool isEnrolling = false;
 extern UART_HandleTypeDef huart2;
+
 // Các handle của FreeRTOS
 osThreadId_t inputTaskHandle;
 osThreadId_t authTaskHandle;
 osMessageQueueId_t inputQueueHandle;
 osTimerId_t autoLockTimerHandle;
-osMutexId_t lcdMutexHandle;      // ← THÊM MUTEX CHO LCD
+osMutexId_t lcdMutexHandle;
 
-// Khai báo biến LCD toàn cục
 CLCD_I2C_Name LCD1;
-
 uint8_t error_count = 0;
 const char correct_PIN[] = "1234";
 char entered_PIN[10];
 uint8_t pin_index = 0;
 
-// ← THÊM MẢNG LƯU TRỮ ID ĐÃ ĐĂNG KÝ (CÓ THỂ LƯU VÀO FLASH THẬT TỪ CẢM BIẾN)
-#define MAX_ENROLLED_IDS 10
-uint16_t enrolledIDs[MAX_ENROLLED_IDS];
-uint8_t enrolledIDCount = 0;
-
+// Các định dạng nguồn phát lệnh
 typedef struct {
     uint8_t dataSource;
     uint16_t value;
 } InputData_t;
-#define SRC_KEYPAD       0
-#define SRC_FINGER       1
-#define SRC_FINGER_FAIL  3
-#define SRC_SYSTEM       99   //
 
-#define EVT_AUTOLOCK     1  //
-
+#define SRC_KEYPAD        0
+#define SRC_FINGER        1
+#define SRC_FINGER_FAIL   3
+#define SRC_REMOTE_UNLOCK 4
+#define SRC_REMOTE_ENROLL 5
+#define SRC_REMOTE_DELETE 6
+#define SRC_SYSTEM        99
+#define EVT_AUTOLOCK      1
 
 void Task_Input(void *argument);
 void Task_Auth(void *argument);
 void AutoLock_Callback(void *argument);
 
-// ← HÀM HỖ TRỢ: IN LÊN LCD VỚI MUTEX
+// --- CÁC BIẾN CHO NGẮT UART TỪ ESP32 ---
+uint8_t rx_byte;
+char rx_buffer[32];
+uint8_t rx_index = 0;
+
 void LCD_Print(uint8_t row, uint8_t col, const char* text) {
     osMutexAcquire(lcdMutexHandle, osWaitForever);
     CLCD_I2C_SetCursor(&LCD1, row, col);
@@ -61,39 +63,42 @@ void LCD_Clear(void) {
     osMutexRelease(lcdMutexHandle);
 }
 
-// ← HÀM HỖ TRỢ: KIỂM TRA ID CÓ TRONG DANH SÁCH KHÔNG
-bool IsIDEnrolled(uint16_t id) {
-    for (int i = 0; i < enrolledIDCount; i++) {
-        if (enrolledIDs[i] == id) {
-            return true;
-        }
-    }
-    return false;
-}
-
-// ← HÀM HỖ TRỢ: THÊM ID VÀO DANH SÁCH
-bool AddID(uint16_t id) {
-    if (enrolledIDCount >= MAX_ENROLLED_IDS) return false;
-    enrolledIDs[enrolledIDCount++] = id;
-    return true;
-}
-
-// ← HÀM HỖ TRỢ: XÓA ID KHỎI DANH SÁCH
-bool RemoveID(uint16_t id) {
-    for (int i = 0; i < enrolledIDCount; i++) {
-        if (enrolledIDs[i] == id) {
-            for (int j = i; j < enrolledIDCount - 1; j++) {
-                enrolledIDs[j] = enrolledIDs[j + 1];
+// --- HÀM NGẮT UART: BẮT LỆNH TỪ APP GỬI XUỐNG ---
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
+    if (huart->Instance == USART2) {
+        if (rx_byte == '\n' || rx_byte == '\r') {
+            rx_buffer[rx_index] = '\0';
+            if (rx_index > 0) {
+                if (strcmp(rx_buffer, "UNLOCK_DOOR") == 0) {
+                    InputData_t remoteData = {SRC_REMOTE_UNLOCK, 1};
+                    osMessageQueuePut(inputQueueHandle, &remoteData, 0, 0);
+                }
+                else if (strncmp(rx_buffer, "ENROLL:", 7) == 0) {
+                    int id = atoi(&rx_buffer[7]);
+                    if (id > 0) {
+                        InputData_t remoteData = {SRC_REMOTE_ENROLL, id};
+                        osMessageQueuePut(inputQueueHandle, &remoteData, 0, 0);
+                    }
+                }
+                else if (strncmp(rx_buffer, "DELETE:", 7) == 0) {
+                    int id = atoi(&rx_buffer[7]);
+                    if (id > 0) {
+                        InputData_t remoteData = {SRC_REMOTE_DELETE, id};
+                        osMessageQueuePut(inputQueueHandle, &remoteData, 0, 0);
+                    }
+                }
             }
-            enrolledIDCount--;
-            return true;
+            rx_index = 0;
+        } else {
+            if (rx_index < sizeof(rx_buffer) - 1) {
+                rx_buffer[rx_index++] = rx_byte;
+            }
         }
+        HAL_UART_Receive_IT(&huart2, &rx_byte, 1);
     }
-    return false;
 }
 
 void App_Init_FreeRTOS(void) {
-    // ← THÊM MUTEX
     const osMutexAttr_t mutex_attr = { .name = "lcdMutex" };
     lcdMutexHandle = osMutexNew(&mutex_attr);
 
@@ -109,7 +114,28 @@ void App_Init_FreeRTOS(void) {
     const osThreadAttr_t auth_attr = { .name = "AuthTask", .stack_size = 256 * 4, .priority = osPriorityAboveNormal };
     authTaskHandle = osThreadNew(Task_Auth, NULL, &auth_attr);
 }
+void Buzzer_Fail(void) {
+    if (error_count >= 3) {
+        // Nếu sai 3 lần trở lên: Hú liên tục 5 giây
+        LCD_Clear();
+        LCD_Print(1, 0, "!!! CANH BAO !!!");
+        LCD_Print(2, 0, " KHOA BI KHOA ");
 
+        // Bật còi (PB5 = SET)
+        HAL_GPIO_WritePin(GPIOB, GPIO_PIN_5, GPIO_PIN_SET);
+        osDelay(5000); // Hú 5 giây
+
+        // Tắt còi (PB5 = RESET)
+        HAL_GPIO_WritePin(GPIOB, GPIO_PIN_5, GPIO_PIN_RESET);
+
+        error_count = 0; // Đặt lại đếm số lần sai
+    } else {
+        // Sai 1 hoặc 2 lần: Kêu 'Bíp' ngắn 200ms
+        HAL_GPIO_WritePin(GPIOB, GPIO_PIN_5, GPIO_PIN_SET);
+        osDelay(200);
+        HAL_GPIO_WritePin(GPIOB, GPIO_PIN_5, GPIO_PIN_RESET);
+    }
+}
 // --- TASK 1: QUÉT CẢM BIẾN ---
 void Task_Input(void *argument) {
     InputData_t data;
@@ -132,13 +158,11 @@ void Task_Input(void *argument) {
                 lastID = -1;
             }
             else if (fingerID == 0) {
-                            // Rút tay ra khỏi cảm biến (GetImage trả về No Finger)
-            	lastID = 0; // Mở khóa trạng thái, sẵn sàng cho lần chạm tiếp theo
+            	lastID = 0;
             }
         }
 
         static char lastKey = 0;
-
         char key = Keypad_GetKey();
         if (key != 0 && key != lastKey) {
             data.dataSource = SRC_KEYPAD;
@@ -149,40 +173,92 @@ void Task_Input(void *argument) {
         osDelay(150);
     }
 }
+
 // --- TASK 2: XỬ LÝ CHÍNH ---
 void Task_Auth(void *argument) {
-    // 1. Khởi tạo LCD
     CLCD_I2C_Init(&LCD1, &hi2c1, 0x4E, 16, 2);
     LCD_Clear();
     LCD_Print(2, 0, "SMART LOCK");
     LCD_Print(3, 1, "SAN SANG...");
 
+    // KÍCH HOẠT LẮNG NGHE LỆNH TỪ APP NGAY KHI KHỞI ĐỘNG
+    HAL_UART_Receive_IT(&huart2, &rx_byte, 1);
+
     InputData_t rxData;
-    uint8_t systemMode = 0; // 0: Chờ chế độ, 1: Chế độ vân tay, 2: Chế độ bàn phím
+    uint8_t systemMode = 0; // 0: Menu, 1: Vân tay, 2: Bàn phím
 
     for(;;) {
         if (osMessageQueueGet(inputQueueHandle, &rxData, NULL, osWaitForever) == osOK) {
             bool unlock = false;
+            char msg_success[40] = "";
+
             if (rxData.dataSource == SRC_SYSTEM) {
-                switch(rxData.value) {
-                    case EVT_AUTOLOCK:
-                        Lock_Close();
-                        LCD_Clear();
-                        LCD_Print(2,0,"DA TU KHOA");
-                        osDelay(800);
-                        LCD_Clear();
-                        LCD_Print(2,0,"SMART LOCK");
-                        LCD_Print(3,1,"SAN SANG...");
-                        break;
+                if (rxData.value == EVT_AUTOLOCK) {
+                    Lock_Close();
+                    LCD_Clear();
+                    LCD_Print(2,0,"DA TU KHOA");
+                    osDelay(800);
+                    LCD_Clear();
+                    LCD_Print(2,0,"SMART LOCK");
+                    LCD_Print(3,1,"SAN SANG...");
                 }
                 continue;
             }
-            // ← TRẠNG THÁI: CHỌN CHẾ ĐỘ (systemMode == 0)
+
+            // LỆNH TỪ APP: YÊU CẦU ĐĂNG KÝ VÂN TAY TỪ XA
+            if (rxData.dataSource == SRC_REMOTE_ENROLL) {
+                uint16_t enroll_id = rxData.value;
+                LCD_Clear();
+                char buf[16];
+                sprintf(buf, "ID %d: DAT TAY", enroll_id);
+                LCD_Print(0, 0, buf);
+
+                isEnrolling = true;
+                int res = AS608_Enroll(enroll_id);
+                isEnrolling = false;
+
+                if (res == 1) {
+                    // Đăng ký thành công, báo cho App
+                    char msg[32];
+                    sprintf(msg, "ENROLL_SUCCESS:%d\n", enroll_id);
+                    HAL_UART_Transmit(&huart2, (uint8_t*)msg, strlen(msg), 100);
+                }
+
+                LCD_Clear();
+                LCD_Print(2, 0, "SMART LOCK");
+                LCD_Print(3, 1, "SAN SANG...");
+                systemMode = 0;
+                continue;
+            }
+
+            // LỆNH TỪ APP: YÊU CẦU XÓA VÂN TAY TỪ XA
+            if (rxData.dataSource == SRC_REMOTE_DELETE) {
+                uint16_t del_id = rxData.value;
+                AS608_DeleteChar(del_id); // Xóa khỏi bộ nhớ Flash
+
+                LCD_Clear();
+                LCD_Print(1, 0, "XOA ID OK!");
+                osDelay(1500);
+
+                LCD_Clear();
+                LCD_Print(2, 0, "SMART LOCK");
+                LCD_Print(3, 1, "SAN SANG...");
+                systemMode = 0;
+                continue;
+            }
+
+            // LỆNH TỪ APP: MỞ KHÓA
+            if (rxData.dataSource == SRC_REMOTE_UNLOCK) {
+                unlock = true;
+                // Nếu mở từ App thì không gửi báo cáo lại cho App nữa (tránh vòng lặp)
+                strcpy(msg_success, "");
+            }
+
+            // CHỌN CHẾ ĐỘ
             else if (systemMode == 0) {
-                if (rxData.dataSource == 0) {
+                if (rxData.dataSource == SRC_KEYPAD) {
                     char key = (char)rxData.value;
                     if (key == 'A') {
-                        // Chế độ vân tay
                         systemMode = 1;
                         LCD_Clear();
                         LCD_Print(1, 0, "CHE DO: VAN TAY");
@@ -191,159 +267,24 @@ void Task_Auth(void *argument) {
                         pin_index = 0;
                     }
                     else if (key == 'B') {
-                        // Chế độ bàn phím
                         systemMode = 2;
                         LCD_Clear();
                         LCD_Print(0, 0, "NHAP PIN:");
                         pin_index = 0;
                     }
-                    else if (key == 'C') {
-                        // Chế độ quản lý vân tay
-                        // ← NHẬP CHẾ ĐỘ QUẢN LÝ ID
-                        LCD_Clear();
-                        LCD_Print(0, 0, "QUAN LY ID:");
-                        LCD_Print(1, 0, "A: Them ID");
-                        LCD_Print(3, 0, "B: Xoa ID");
-                        osDelay(1000);
-
-                        char mgmtKey = 0;
-                        while (mgmtKey == 0) {
-                            InputData_t mgmtData;
-                            if (osMessageQueueGet(inputQueueHandle, &mgmtData, NULL, 500) == osOK) {
-                                if (mgmtData.dataSource == 0) {
-                                    mgmtKey = (char)mgmtData.value;
-                                }
-                            }
-                        }
-                        if (mgmtKey == '*')   // ← EXIT
-                                            {
-                                                systemMode = 0;
-                                                pin_index = 0;
-
-                                                LCD_Clear();
-                                                LCD_Print(2, 0, "SMART LOCK");
-                                                LCD_Print(3, 1, "SAN SANG...");
-                                                osDelay(300);
-                                            }
-                        else if (mgmtKey == 'A') {
-                            // Thêm ID (gọi chế độ đăng ký)
-                            isEnrolling = true;
-                            LCD_Clear();
-                            LCD_Print(0, 0, "NHAP ID(1-300):");
-                            char id_str[4] = "";
-                            uint8_t id_idx = 0;
-                            bool cancel = false;
-
-                            while (1) {
-                                InputData_t enrollData;
-                                if (osMessageQueueGet(inputQueueHandle, &enrollData, NULL, osWaitForever) == osOK) {
-                                    if (enrollData.dataSource == 0) {
-                                        char k = (char)enrollData.value;
-
-                                        if (k >= '0' && k <= '9' && id_idx < 3) {
-                                            id_str[id_idx++] = k;
-                                            id_str[id_idx] = '\0';
-                                            LCD_Print(6, 1, id_str);
-                                        }
-                                        else if (k == 'C') {
-                                            id_idx = 0;
-                                            id_str[0] = '\0';
-                                            LCD_Print(6, 1, "   ");
-                                        }
-                                        else if (k == 'A') {
-                                            cancel = true;
-                                            break;
-                                        }
-                                        else if (k == 'D') {
-                                            break;
-                                        }
-                                    }
-                                }
-                            }
-
-                            if (!cancel && id_idx > 0) {
-                                int enroll_id = 0;
-                                for(int i = 0; i < id_idx; i++) {
-                                    enroll_id = enroll_id * 10 + (id_str[i] - '0');
-                                }
-
-                                if (enroll_id >= 1 && enroll_id <= 300) {
-                                    AS608_Enroll(enroll_id);
-                                    AddID(enroll_id); // ← THÊM VÀO DANH SÁCH
-                                } else {
-                                    LCD_Clear();
-                                    LCD_Print(0, 0, "ID KHONG HOP LE!");
-                                    osDelay(2000);
-                                }
-                            }
-
-                            isEnrolling = false;
-                            LCD_Clear();
-                            LCD_Print(2, 0, "SMART LOCK");
-                            LCD_Print(3, 1, "SAN SANG...");
-                            systemMode = 0;
-                        }
-                        else if (mgmtKey == 'B') {
-                            // Xóa ID
-                            LCD_Clear();
-                            LCD_Print(0, 0, "NHAP ID XOA:");
-                            char id_str[4] = "";
-                            uint8_t id_idx = 0;
-
-                            while (1) {
-                                InputData_t enrollData;
-                                if (osMessageQueueGet(inputQueueHandle, &enrollData, NULL, osWaitForever) == osOK) {
-                                    if (enrollData.dataSource == 0) {
-                                        char k = (char)enrollData.value;
-
-                                        if (k >= '0' && k <= '9' && id_idx < 3) {
-                                            id_str[id_idx++] = k;
-                                            id_str[id_idx] = '\0';
-                                            LCD_Print(6, 1, id_str);
-                                        }
-                                        else if (k == 'C') {
-                                            id_idx = 0;
-                                            id_str[0] = '\0';
-                                            LCD_Print(6, 1, "   ");
-                                        }
-                                        else if (k == 'D') {
-                                            break;
-                                        }
-                                    }
-                                }
-                            }
-
-                            if (id_idx > 0) {
-                                int delete_id = 0;
-                                for(int i = 0; i < id_idx; i++) {
-                                    delete_id = delete_id * 10 + (id_str[i] - '0');
-                                }
-
-                                if (RemoveID(delete_id)) {
-                                    LCD_Clear();
-                                    LCD_Print(1, 0, "XOA ID OK!");
-                                    osDelay(1500);
-                                } else {
-                                    LCD_Clear();
-                                    LCD_Print(0, 0, "ID KHONG TON TAI!");
-                                    osDelay(1500);
-                                }
-                            }
-
-                            LCD_Clear();
-                            LCD_Print(2, 0, "SMART LOCK");
-                            LCD_Print(3, 1, "SAN SANG...");
-                            systemMode = 0;
-                        }
-                    }
+                    // BỎ NÚT C QUẢN LÝ Ở ĐÂY, ĐÃ DỊCH CHUYỂN LÊN APP
                 }
             }
-            // ← TRẠNG THÁI: CHẾ ĐỘ VÂN TAY (systemMode == 1)
+            // CHẾ ĐỘ VÂN TAY
             else if (systemMode == 1) {
-                if (rxData.dataSource == 1 && rxData.value > 0) {
+                if (rxData.dataSource == SRC_FINGER && rxData.value > 0) {
                     unlock = true;
+                    // Báo cáo lên App: Truyền số ID vân tay
+                    sprintf(msg_success, "DOOR_OPENED:FINGER:%d\n", rxData.value);
                 }
-                else if (rxData.dataSource == 3) {
+                else if (rxData.dataSource == SRC_FINGER_FAIL) {
+                	error_count++;
+                	Buzzer_Fail();
                     LCD_Clear();
                     LCD_Print(1, 0, "VANTAY KHONG HOP");
                     osDelay(2000);
@@ -351,27 +292,22 @@ void Task_Auth(void *argument) {
                     LCD_Print(1, 0, "CHE DO: VAN TAY");
                     LCD_Print(3, 1, "SAN SANG...");
                 }
-                else if (rxData.dataSource == 0) {
-                    char key = (char)rxData.value;
-                    if (key == '*') {
-                        // Quay về menu chính
+                else if (rxData.dataSource == SRC_KEYPAD) {
+                    if ((char)rxData.value == '*') {
                         LCD_Clear();
                         LCD_Print(2, 0, "SMART LOCK");
                         LCD_Print(3, 1, "SAN SANG...");
                         systemMode = 0;
                     }
                 }
-
             }
-            // ← TRẠNG THÁI: CHẾ ĐỘ BÀN PHÍM (systemMode == 2)
+            // CHẾ ĐỘ BÀN PHÍM
             else if (systemMode == 2) {
-                if (rxData.dataSource == 0) {
+                if (rxData.dataSource == SRC_KEYPAD) {
                     char key = (char)rxData.value;
-                    if (key == '*')   // ← EXIT
-                    {
+                    if (key == '*') {
                         systemMode = 0;
                         pin_index = 0;
-
                         LCD_Clear();
                         LCD_Print(2, 0, "SMART LOCK");
                         LCD_Print(3, 1, "SAN SANG...");
@@ -381,7 +317,10 @@ void Task_Auth(void *argument) {
                         entered_PIN[pin_index] = '\0';
                         if (strcmp(entered_PIN, correct_PIN) == 0) {
                             unlock = true;
+                            sprintf(msg_success, "DOOR_OPENED:PIN\n");
                         } else {
+                        	error_count++;
+                        	Buzzer_Fail();
                             LCD_Clear();
                             LCD_Print(2, 0, "SAI MA PIN!");
                             osDelay(2000);
@@ -397,40 +336,34 @@ void Task_Auth(void *argument) {
                     }
                     else if (pin_index < 9) {
                         entered_PIN[pin_index++] = key;
-                        LCD_Print(pin_index, 1, "*"); // Hiển thị * thay vì mật khẩu thật
+                        LCD_Print(pin_index, 1, "*");
                     }
-
                 }
             }
 
+            // MỞ KHÓA THỰC TẾ
             if (unlock) {
+            	error_count = 0;
                 LCD_Clear();
                 LCD_Print(4, 0, "MO CUA");
                 Lock_Open();
-                char *msg_success = "MO CUA THANH CONG!\r\n";
-                if (systemMode == 1) {
-                	HAL_UART_Transmit(&huart2, (uint8_t*)msg_success, strlen(msg_success), 100);
-                } else if (systemMode == 2) {
-                	HAL_UART_Transmit(&huart2, (uint8_t*)msg_success, strlen(msg_success), 100);
+
+                // Báo cáo lên App nếu chuỗi phản hồi không rỗng
+                if (strlen(msg_success) > 0) {
+                    HAL_UART_Transmit(&huart2, (uint8_t*)msg_success, strlen(msg_success), 100);
                 }
+
                 osTimerStop(autoLockTimerHandle);
-                if (osTimerStart(autoLockTimerHandle, 3000) != osOK) {
-                    // debug ở đây
-                }                systemMode = 0; // ← QUAY VỀ MENU CHÍNH
+                osTimerStart(autoLockTimerHandle, 3000);
+                systemMode = 0;
             }
         }
     }
 }
 
-
-// --- CALLBACK TIMER: TỰ ĐỘNG KHÓA ---
-void AutoLock_Callback(void *argument)
-{
+void AutoLock_Callback(void *argument) {
     InputData_t ev;
     ev.dataSource = SRC_SYSTEM;
     ev.value = EVT_AUTOLOCK;
-
-    if (osMessageQueuePut(inputQueueHandle, &ev, 0, 0) != osOK) {
-        // queue full → mất event
-    }
+    osMessageQueuePut(inputQueueHandle, &ev, 0, 0);
 }
