@@ -1,0 +1,12 @@
+# Đánh dấu toàn bộ thư mục gốc của STM32 là thư viện (không tính vào thống kê ngôn ngữ)
+HTN_Final/** linguist-vendored
+
+# Nhưng BỎ ĐÁNH DẤU cho các file code bạn tự tay viết (để Github đếm số lượng C của các file này)
+HTN_Final/Core/Src/app_freertos.c linguist-vendored=false
+HTN_Final/Core/Src/main.c linguist-vendored=false
+HTN_Final/Core/Src/as608.c linguist-vendored=false
+HTN_Final/Core/Src/servo.c linguist-vendored=false
+HTN_Final/Core/Inc/*.h linguist-vendored=false
+
+# Đảm bảo Github nhận diện file Python
+*.py linguist-detectable
