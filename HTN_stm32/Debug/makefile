@@ -64,8 +64,8 @@ all: main-build
 main-build: HTN_Final.elf secondary-outputs
 
 # Tool invocations
-HTN_Final.elf HTN_Final.map: $(OBJS) $(USER_OBJS) D:\htn2\HTN_Final\STM32F103C8TX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "HTN_Final.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m3 -T"D:\htn2\HTN_Final\STM32F103C8TX_FLASH.ld" --specs=nosys.specs -Wl,-Map="HTN_Final.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+HTN_Final.elf HTN_Final.map: $(OBJS) $(USER_OBJS) D:\SmartLockGithub\Embedded-System-Smart-Lock-STM32\HTN_stm32\STM32F103C8TX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "HTN_Final.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m3 -T"D:\SmartLockGithub\Embedded-System-Smart-Lock-STM32\HTN_stm32\STM32F103C8TX_FLASH.ld" --specs=nosys.specs -Wl,-Map="HTN_Final.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 

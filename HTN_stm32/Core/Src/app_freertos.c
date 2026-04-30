@@ -19,6 +19,7 @@ osThreadId_t authTaskHandle;
 osMessageQueueId_t inputQueueHandle;
 osTimerId_t autoLockTimerHandle;
 osMutexId_t lcdMutexHandle;
+osSemaphoreId_t buzzerSemaphoreHandle;
 
 CLCD_I2C_Name LCD1;
 uint8_t error_count = 0;
@@ -44,6 +45,7 @@ typedef struct {
 void Task_Input(void *argument);
 void Task_Auth(void *argument);
 void AutoLock_Callback(void *argument);
+void Task_Buzzer(void *argument);
 
 // --- CÁC BIẾN CHO NGẮT UART TỪ ESP32 ---
 uint8_t rx_byte;
@@ -113,28 +115,24 @@ void App_Init_FreeRTOS(void) {
 
     const osThreadAttr_t auth_attr = { .name = "AuthTask", .stack_size = 256 * 4, .priority = osPriorityAboveNormal };
     authTaskHandle = osThreadNew(Task_Auth, NULL, &auth_attr);
+
+    // --- KHỞI TẠO SEMAPHORE VÀ TASK CHO BUZZER ---
+    const osSemaphoreAttr_t sem_attr = { .name = "buzzerSem" };
+    buzzerSemaphoreHandle = osSemaphoreNew(1, 0, &sem_attr);
+
+    const osThreadAttr_t buzzer_attr = { .name = "BuzzerTask", .stack_size = 128 * 4, .priority = osPriorityNormal };
+    osThreadNew(Task_Buzzer, NULL, &buzzer_attr);
 }
 void Buzzer_Fail(void) {
     if (error_count >= 3) {
-        // Nếu sai 3 lần trở lên: Hú liên tục 5 giây
+        // Chỉ in ra màn hình cảnh báo
         LCD_Clear();
         LCD_Print(1, 0, "!!! CANH BAO !!!");
         LCD_Print(2, 0, " KHOA BI KHOA ");
-
-        // Bật còi (PB5 = SET)
-        HAL_GPIO_WritePin(GPIOB, GPIO_PIN_5, GPIO_PIN_SET);
-        osDelay(5000); // Hú 5 giây
-
-        // Tắt còi (PB5 = RESET)
-        HAL_GPIO_WritePin(GPIOB, GPIO_PIN_5, GPIO_PIN_RESET);
-
-        error_count = 0; // Đặt lại đếm số lần sai
-    } else {
-        // Sai 1 hoặc 2 lần: Kêu 'Bíp' ngắn 200ms
-        HAL_GPIO_WritePin(GPIOB, GPIO_PIN_5, GPIO_PIN_SET);
-        osDelay(200);
-        HAL_GPIO_WritePin(GPIOB, GPIO_PIN_5, GPIO_PIN_RESET);
     }
+    
+    // Nhả Semaphore để đánh thức luồng Task_Buzzer thức dậy hú còi
+    osSemaphoreRelease(buzzerSemaphoreHandle);
 }
 // --- TASK 1: QUÉT CẢM BIẾN ---
 void Task_Input(void *argument) {
@@ -366,4 +364,26 @@ void AutoLock_Callback(void *argument) {
     ev.dataSource = SRC_SYSTEM;
     ev.value = EVT_AUTOLOCK;
     osMessageQueuePut(inputQueueHandle, &ev, 0, 0);
+}
+
+// --- TASK 3: LUỒNG RIÊNG CHO CÒI BUZZER ---
+void Task_Buzzer(void *argument) {
+    for(;;) {
+        // Task sẽ đứng đợi ở đây mãi mãi (osWaitForever) cho đến khi có ai "nhả" Semaphore
+        if (osSemaphoreAcquire(buzzerSemaphoreHandle, osWaitForever) == osOK) {
+            if (error_count >= 3) {
+                // Sai 3 lần: Hú dài 5 giây (Buzzer Active-High: SET là BẬT, RESET là TẮT)
+                HAL_GPIO_WritePin(GPIOB, GPIO_PIN_5, GPIO_PIN_SET); // Bật còi
+                osDelay(5000); 
+                HAL_GPIO_WritePin(GPIOB, GPIO_PIN_5, GPIO_PIN_RESET);   // Tắt còi
+                
+                error_count = 0; // Tự reset lại bộ đếm sau khi hú xong
+            } else {
+                // Sai 1 hoặc 2 lần: Kêu 'Bíp' ngắn 200ms
+                HAL_GPIO_WritePin(GPIOB, GPIO_PIN_5, GPIO_PIN_SET); // Bật còi
+                osDelay(200);
+                HAL_GPIO_WritePin(GPIOB, GPIO_PIN_5, GPIO_PIN_RESET);   // Tắt còi
+            }
+        }
+    }
 }
