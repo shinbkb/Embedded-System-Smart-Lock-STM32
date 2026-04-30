@@ -23,7 +23,8 @@ osSemaphoreId_t buzzerSemaphoreHandle;
 
 CLCD_I2C_Name LCD1;
 uint8_t error_count = 0;
-const char correct_PIN[] = "1234";
+char correct_PIN[10] = "1234";
+char pending_new_pin[10];
 char entered_PIN[10];
 uint8_t pin_index = 0;
 
@@ -39,6 +40,7 @@ typedef struct {
 #define SRC_REMOTE_UNLOCK 4
 #define SRC_REMOTE_ENROLL 5
 #define SRC_REMOTE_DELETE 6
+#define SRC_REMOTE_CHANGE_PIN 7
 #define SRC_SYSTEM        99
 #define EVT_AUTOLOCK      1
 
@@ -51,6 +53,37 @@ void Task_Buzzer(void *argument);
 uint8_t rx_byte;
 char rx_buffer[32];
 uint8_t rx_index = 0;
+
+// --- LƯU TRỮ FLASH ---
+#define FLASH_USER_START_ADDR   0x0800FC00   // Địa chỉ Page 63 (Trang cuối của Flash 64KB)
+
+void Save_PIN_To_Flash(const char* pin) {
+    HAL_FLASH_Unlock();
+    FLASH_EraseInitTypeDef EraseInitStruct;
+    uint32_t PAGEError = 0;
+    
+    EraseInitStruct.TypeErase   = FLASH_TYPEERASE_PAGES;
+    EraseInitStruct.PageAddress = FLASH_USER_START_ADDR;
+    EraseInitStruct.NbPages     = 1;
+    
+    if (HAL_FLASHEx_Erase(&EraseInitStruct, &PAGEError) == HAL_OK) {
+        uint32_t Address = FLASH_USER_START_ADDR;
+        for(int i = 0; i < 10; i += 2) {
+            uint16_t half_word = pin[i] | (pin[i+1] << 8);
+            HAL_FLASH_Program(FLASH_TYPEPROGRAM_HALFWORD, Address, half_word);
+            Address += 2;
+        }
+    }
+    HAL_FLASH_Lock();
+}
+
+void Load_PIN_From_Flash(void) {
+    char* flash_pin = (char*)FLASH_USER_START_ADDR;
+    if (flash_pin[0] != (char)0xFF) { // Nếu Flash không trống
+        strncpy(correct_PIN, flash_pin, 9);
+        correct_PIN[9] = '\0';
+    }
+}
 
 void LCD_Print(uint8_t row, uint8_t col, const char* text) {
     osMutexAcquire(lcdMutexHandle, osWaitForever);
@@ -88,6 +121,12 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
                         InputData_t remoteData = {SRC_REMOTE_DELETE, id};
                         osMessageQueuePut(inputQueueHandle, &remoteData, 0, 0);
                     }
+                }
+                else if (strncmp(rx_buffer, "CHANGE_PIN:", 11) == 0) {
+                    strncpy(pending_new_pin, &rx_buffer[11], 9);
+                    pending_new_pin[9] = '\0';
+                    InputData_t remoteData = {SRC_REMOTE_CHANGE_PIN, 0};
+                    osMessageQueuePut(inputQueueHandle, &remoteData, 0, 0);
                 }
             }
             rx_index = 0;
@@ -174,6 +213,8 @@ void Task_Input(void *argument) {
 
 // --- TASK 2: XỬ LÝ CHÍNH ---
 void Task_Auth(void *argument) {
+    Load_PIN_From_Flash(); // Đọc mã PIN từ bộ nhớ Flash chống mất điện
+
     CLCD_I2C_Init(&LCD1, &hi2c1, 0x4E, 16, 2);
     LCD_Clear();
     LCD_Print(2, 0, "SMART LOCK");
@@ -236,6 +277,22 @@ void Task_Auth(void *argument) {
 
                 LCD_Clear();
                 LCD_Print(1, 0, "XOA ID OK!");
+                osDelay(1500);
+
+                LCD_Clear();
+                LCD_Print(2, 0, "SMART LOCK");
+                LCD_Print(3, 1, "SAN SANG...");
+                systemMode = 0;
+                continue;
+            }
+
+            // LỆNH TỪ APP: YÊU CẦU ĐỔI PIN
+            if (rxData.dataSource == SRC_REMOTE_CHANGE_PIN) {
+                strcpy(correct_PIN, pending_new_pin);
+                Save_PIN_To_Flash(correct_PIN); // Lưu vĩnh viễn vào Flash
+                
+                LCD_Clear();
+                LCD_Print(1, 0, "DOI PIN OK!");
                 osDelay(1500);
 
                 LCD_Clear();
@@ -378,6 +435,7 @@ void Task_Buzzer(void *argument) {
                 HAL_GPIO_WritePin(GPIOB, GPIO_PIN_5, GPIO_PIN_RESET);   // Tắt còi
                 
                 error_count = 0; // Tự reset lại bộ đếm sau khi hú xong
+
             } else {
                 // Sai 1 hoặc 2 lần: Kêu 'Bíp' ngắn 200ms
                 HAL_GPIO_WritePin(GPIOB, GPIO_PIN_5, GPIO_PIN_SET); // Bật còi

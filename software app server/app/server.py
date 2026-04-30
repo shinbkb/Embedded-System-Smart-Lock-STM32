@@ -96,6 +96,41 @@ def get_users_from_db():
         print(f"[DB Error] Lỗi đọc users: {e}")
         return json.dumps({"type": "users_data", "data": []})
 
+# --- HÀM 5: ĐĂNG NHẬP / ĐĂNG KÝ ---
+def verify_login(username, password):
+    try:
+        mydb = mysql.connector.connect(
+            host="localhost", user="root", password="Binh2004@", database="smartlock_db"
+        )
+        cursor = mydb.cursor()
+        cursor.execute("SELECT * FROM app_accounts WHERE username=%s AND password=%s", (username, password))
+        result = cursor.fetchone()
+        cursor.close()
+        mydb.close()
+        return result is not None
+    except Exception as e:
+        print(f"[DB Error] Lỗi đăng nhập: {e}")
+        return False
+
+def register_account(username, password):
+    try:
+        mydb = mysql.connector.connect(
+            host="localhost", user="root", password="Binh2004@", database="smartlock_db"
+        )
+        cursor = mydb.cursor()
+        cursor.execute("SELECT * FROM app_accounts WHERE username=%s", (username,))
+        if cursor.fetchone():
+            cursor.close()
+            mydb.close()
+            return False # Đã tồn tại
+        cursor.execute("INSERT INTO app_accounts (username, password) VALUES (%s, %s)", (username, password))
+        mydb.commit()
+        cursor.close()
+        mydb.close()
+        return True
+    except Exception as e:
+        print(f"[DB Error] Lỗi đăng ký: {e}")
+        return False
 
 async def handler(websocket, *args, **kwargs):
     client_ip = websocket.remote_address[0]
@@ -106,6 +141,29 @@ async def handler(websocket, *args, **kwargs):
         async for message in websocket:
             print(f"[Nhận] {message}")
             
+            # --- 0. LOGIN / REGISTER ---
+            if message.startswith("WEB_CMD:LOGIN:"):
+                parts = message.split(":")
+                if len(parts) >= 4:
+                    user = parts[2]
+                    pwd = parts[3]
+                    if verify_login(user, pwd):
+                        await websocket.send("LOGIN_SUCCESS")
+                    else:
+                        await websocket.send("LOGIN_FAIL")
+                continue
+                
+            if message.startswith("WEB_CMD:REGISTER:"):
+                parts = message.split(":")
+                if len(parts) >= 4:
+                    user = parts[2]
+                    pwd = parts[3]
+                    if register_account(user, pwd):
+                        await websocket.send("REGISTER_SUCCESS")
+                    else:
+                        await websocket.send("REGISTER_FAIL")
+                continue
+
             # --- 1. APP YÊU CẦU LỊCH SỬ ---
             if message == "GET_LOGS":
                 logs_json = get_logs_from_db()
