@@ -1,9 +1,0 @@
-../Core/Src/app_freertos.c:51:6:LCD_Print	1
-../Core/Src/app_freertos.c:58:6:LCD_Clear	1
-../Core/Src/app_freertos.c:65:6:IsIDEnrolled	3
-../Core/Src/app_freertos.c:75:6:AddID	2
-../Core/Src/app_freertos.c:82:6:RemoveID	4
-../Core/Src/app_freertos.c:95:6:App_Init_FreeRTOS	1
-../Core/Src/app_freertos.c:114:6:Task_Input	9
-../Core/Src/app_freertos.c:153:6:Task_Auth	54
-../Core/Src/app_freertos.c:427:6:AutoLock_Callback	1

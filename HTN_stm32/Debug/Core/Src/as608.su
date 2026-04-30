@@ -1,0 +1,10 @@
+../Core/Src/as608.c:9:13:AS608_SendCommand	24	static
+../Core/Src/as608.c:16:16:AS608_ReceiveResponse	24	static
+../Core/Src/as608.c:26:9:AS608_GetImage	32	static
+../Core/Src/as608.c:33:9:AS608_GenChar	40	static
+../Core/Src/as608.c:40:9:AS608_Search	48	static
+../Core/Src/as608.c:55:5:AS608_CheckFingerprint	16	static
+../Core/Src/as608.c:63:9:AS608_RegModel	32	static
+../Core/Src/as608.c:72:9:AS608_StoreChar	40	static
+../Core/Src/as608.c:82:5:AS608_Enroll	16	static
+../Core/Src/as608.c:110:9:AS608_DeleteChar	40	static

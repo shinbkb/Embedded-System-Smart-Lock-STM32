@@ -1,0 +1,8 @@
+../Core/Src/app_freertos.c:53:6:LCD_Print	1
+../Core/Src/app_freertos.c:60:6:LCD_Clear	1
+../Core/Src/app_freertos.c:67:6:HAL_UART_RxCpltCallback	11
+../Core/Src/app_freertos.c:101:6:App_Init_FreeRTOS	1
+../Core/Src/app_freertos.c:117:6:Buzzer_Fail	2
+../Core/Src/app_freertos.c:140:6:Task_Input	9
+../Core/Src/app_freertos.c:178:6:Task_Auth	27
+../Core/Src/app_freertos.c:364:6:AutoLock_Callback	1

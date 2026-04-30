@@ -1,0 +1,8 @@
+../Core/Src/app_freertos.c:53:6:LCD_Print	16	static
+../Core/Src/app_freertos.c:60:6:LCD_Clear	8	static
+../Core/Src/app_freertos.c:67:6:HAL_UART_RxCpltCallback	40	static
+../Core/Src/app_freertos.c:101:6:App_Init_FreeRTOS	136	static
+../Core/Src/app_freertos.c:117:6:Buzzer_Fail	8	static
+../Core/Src/app_freertos.c:140:6:Task_Input	32	static
+../Core/Src/app_freertos.c:178:6:Task_Auth	128	static
+../Core/Src/app_freertos.c:364:6:AutoLock_Callback	24	static

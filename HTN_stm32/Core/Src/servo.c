@@ -11,7 +11,7 @@ void Servo_Init(void) {
 
 void Lock_Open(void) {
     // Xoay 90 độ (Mở chốt) - Cấp giá trị 1500 (1.5ms) vào thanh ghi CCR1
-    __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_1, 1500);
+    __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_1, 2000);
 }
 
 void Lock_Close(void) {

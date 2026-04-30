@@ -13,6 +13,8 @@ int AS608_CheckFingerprint(void);
 uint8_t AS608_RegModel(void);
 uint8_t AS608_StoreChar(uint8_t bufferID, uint16_t pageID);
 int AS608_Enroll(uint16_t id);
+
+// --- HÀM MỚI THÊM ĐỂ XÓA VÂN TAY ---
 uint8_t AS608_DeleteChar(uint16_t pageID);
 
 #endif
