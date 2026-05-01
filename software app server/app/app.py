@@ -86,8 +86,8 @@ async def main(page: ft.Page):
                 ft.Row([name_input, id_input]),
                 ft.Container(height=10),
                 ft.Row([
-                    ft.ElevatedButton("Thêm", icon=ft.Icons.FINGERPRINT, bgcolor=ft.Colors.GREEN_700, color=ft.Colors.WHITE, on_click=btn_enroll_clicked),
-                    ft.ElevatedButton("Xóa", icon=ft.Icons.DELETE, bgcolor=ft.Colors.RED_700, color=ft.Colors.WHITE, on_click=btn_delete_clicked),
+                    ft.Button("Thêm", icon=ft.Icons.FINGERPRINT, bgcolor=ft.Colors.GREEN_700, color=ft.Colors.WHITE, on_click=btn_enroll_clicked),
+                    ft.Button("Xóa", icon=ft.Icons.DELETE, bgcolor=ft.Colors.RED_700, color=ft.Colors.WHITE, on_click=btn_delete_clicked),
                 ], alignment=ft.MainAxisAlignment.SPACE_BETWEEN),
                 ft.Container(height=10),
                 enroll_status,
@@ -251,7 +251,7 @@ async def main(page: ft.Page):
             bgcolor = ft.Colors.with_opacity(0.1, ft.Colors.WHITE)
         return ft.Container(
             content=content, width=width, height=height, padding=padding, border_radius=border_radius,
-            bgcolor=bgcolor, border=ft.border.all(1, ft.Colors.with_opacity(0.2, ft.Colors.WHITE)),
+            bgcolor=bgcolor, border=ft.Border.all(1, ft.Colors.with_opacity(0.2, ft.Colors.WHITE)),
             blur=15, on_click=on_click, ink=True if on_click else False, alignment=ft.Alignment(0, 0)
         )
 
@@ -422,5 +422,5 @@ async def main(page: ft.Page):
     asyncio.create_task(connect_server())
 
 if __name__ == "__main__":
-    ft.app(target=main)
+    ft.app(main, view=ft.AppView.WEB_BROWSER, port=8080)
 

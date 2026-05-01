@@ -1,0 +1,21 @@
+[tool.flet]
+app_name = "Smart Lock"
+description = "Smart Lock Control App"
+org = "com.smartlock"
+
+[tool.flet.app]
+module = "app"
+
+[tool.flet.android]
+permissions = ["android.permission.INTERNET"]
+
+[build-system]
+requires = ["flet-build-tools"]
+
+[project]
+name = "smartlock"
+version = "1.0.0"
+dependencies = [
+    "websockets",
+    "flet",
+]
