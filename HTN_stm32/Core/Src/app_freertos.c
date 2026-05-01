@@ -61,7 +61,7 @@ uint8_t rx_index = 0;
 // LƯU TRỮ FLASH 
 #define FLASH_USER_START_ADDR   0x0800FC00   // Địa chỉ Page 63 (Trang cuối của Flash 64KB)
 
-void Save_PIN_To_Flash(const char* pin) {                // Hàm lưu mã PIN vào Flash
+void Save_PIN_To_Flash(const char* pin) {                // Hàm lưu mã PIN vào Flash STM32
     HAL_FLASH_Unlock();                                 // Mở khóa Flash
     FLASH_EraseInitTypeDef EraseInitStruct;               // Khai báo cấu hình xóa Flash
     uint32_t PAGEError = 0;                               // Biến báo lỗi xóa Flash
@@ -78,7 +78,7 @@ void Save_PIN_To_Flash(const char* pin) {                // Hàm lưu mã PIN v�
             Address += 2;                                                       // Tăng địa chỉ
         }
     }
-    HAL_FLASH_Lock();                                                       // Khóa Flash
+    HAL_FLASH_Lock();                                                       // Khóa Flash 
 }
 
 void Load_PIN_From_Flash(void) {                                             // Hàm đọc mã PIN từ Flash
