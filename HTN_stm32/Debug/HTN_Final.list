@@ -27,25 +27,25 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   ALLOC
  11 .ARM.attributes 00000029  00000000  00000000  0000c09c  2**0
                   CONTENTS, READONLY
- 12 .debug_info   0001e39d  00000000  00000000  0000c0c5  2**0
+ 12 .debug_info   0001e38d  00000000  00000000  0000c0c5  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 13 .debug_abbrev 00004574  00000000  00000000  0002a462  2**0
+ 13 .debug_abbrev 00004574  00000000  00000000  0002a452  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 14 .debug_aranges 000019c0  00000000  00000000  0002e9d8  2**3
+ 14 .debug_aranges 000019c0  00000000  00000000  0002e9c8  2**3
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 15 .debug_rnglists 00001413  00000000  00000000  00030398  2**0
+ 15 .debug_rnglists 00001413  00000000  00000000  00030388  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 16 .debug_macro  0001b440  00000000  00000000  000317ab  2**0
+ 16 .debug_macro  0001b440  00000000  00000000  0003179b  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 17 .debug_line   0001e6d5  00000000  00000000  0004cbeb  2**0
+ 17 .debug_line   0001e6d5  00000000  00000000  0004cbdb  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 18 .debug_str    0009863d  00000000  00000000  0006b2c0  2**0
+ 18 .debug_str    0009863d  00000000  00000000  0006b2b0  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 19 .comment      00000043  00000000  00000000  001038fd  2**0
+ 19 .comment      00000043  00000000  00000000  001038ed  2**0
                   CONTENTS, READONLY
- 20 .debug_frame  000071f8  00000000  00000000  00103940  2**2
+ 20 .debug_frame  000071f8  00000000  00000000  00103930  2**2
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 21 .debug_line_str 00000040  00000000  00000000  0010ab38  2**0
+ 21 .debug_line_str 00000040  00000000  00000000  0010ab28  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
 
 Disassembly of section .text:
@@ -557,7 +557,7 @@ void CLCD_I2C_Clear(CLCD_I2C_Name* LCD)
 08000430 <Save_PIN_To_Flash>:
 uint8_t rx_index = 0;
 
-// --- LƯU TRỮ FLASH ---
+// LƯU TRỮ FLASH 
 #define FLASH_USER_START_ADDR   0x0800FC00   // Địa chỉ Page 63 (Trang cuối của Flash 64KB)
 
 void Save_PIN_To_Flash(const char* pin) {
@@ -704,7 +704,7 @@ void LCD_Print(uint8_t row, uint8_t col, const char* text) {
  800051a:	4619      	mov	r1, r3
  800051c:	4808      	ldr	r0, [pc, #32]	@ (8000540 <LCD_Print+0x48>)
  800051e:	f7ff ff0c 	bl	800033a <CLCD_I2C_SetCursor>
-    CLCD_I2C_WriteString(&LCD1, text);
+    CLCD_I2C_WriteString(&LCD1, (char*)text);
  8000522:	6839      	ldr	r1, [r7, #0]
  8000524:	4806      	ldr	r0, [pc, #24]	@ (8000540 <LCD_Print+0x48>)
  8000526:	f7ff ff5b 	bl	80003e0 <CLCD_I2C_WriteString>
@@ -749,7 +749,7 @@ void LCD_Clear(void) {
 
 08000574 <HAL_UART_RxCpltCallback>:
 
-// --- HÀM NGẮT UART: BẮT LỆNH TỪ APP GỬI XUỐNG ---
+// Hàm ngắt UART: Bắt lệnh từ ESP32
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
  8000574:	b580      	push	{r7, lr}
  8000576:	b088      	sub	sp, #32
@@ -951,11 +951,11 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 
 080006f0 <App_Init_FreeRTOS>:
 
-void App_Init_FreeRTOS(void) {
+void App_Init_FreeRTOS(void) {      // Khởi tạo FreeRTOS
  80006f0:	b580      	push	{r7, lr}
  80006f2:	b0ae      	sub	sp, #184	@ 0xb8
  80006f4:	af00      	add	r7, sp, #0
-    const osMutexAttr_t mutex_attr = { .name = "lcdMutex" };
+    const osMutexAttr_t mutex_attr = { .name = "lcdMutex" }; // Tạo Mutex cho LCD
  80006f6:	f107 03a8 	add.w	r3, r7, #168	@ 0xa8
  80006fa:	2200      	movs	r2, #0
  80006fc:	601a      	str	r2, [r3, #0]
@@ -972,7 +972,7 @@ void App_Init_FreeRTOS(void) {
  8000716:	4a44      	ldr	r2, [pc, #272]	@ (8000828 <App_Init_FreeRTOS+0x138>)
  8000718:	6013      	str	r3, [r2, #0]
 
-    const osMessageQueueAttr_t q_attr = { .name = "inputQueue" };
+    const osMessageQueueAttr_t q_attr = { .name = "inputQueue" }; // Tạo Queue cho Input
  800071a:	f107 0390 	add.w	r3, r7, #144	@ 0x90
  800071e:	2200      	movs	r2, #0
  8000720:	601a      	str	r2, [r3, #0]
@@ -993,7 +993,7 @@ void App_Init_FreeRTOS(void) {
  8000742:	4a3b      	ldr	r2, [pc, #236]	@ (8000830 <App_Init_FreeRTOS+0x140>)
  8000744:	6013      	str	r3, [r2, #0]
 
-    const osTimerAttr_t t_attr = { .name = "autoLockTimer" };
+    const osTimerAttr_t t_attr = { .name = "autoLockTimer" }; // Tạo Timer cho AutoLock
  8000746:	f107 0380 	add.w	r3, r7, #128	@ 0x80
  800074a:	2200      	movs	r2, #0
  800074c:	601a      	str	r2, [r3, #0]
@@ -1012,7 +1012,7 @@ void App_Init_FreeRTOS(void) {
  800076a:	4a34      	ldr	r2, [pc, #208]	@ (800083c <App_Init_FreeRTOS+0x14c>)
  800076c:	6013      	str	r3, [r2, #0]
 
-    const osThreadAttr_t input_attr = { .name = "InputTask", .stack_size = 128 * 4, .priority = osPriorityNormal };
+    const osThreadAttr_t input_attr = { .name = "InputTask", .stack_size = 128 * 4, .priority = osPriorityNormal }; // Tạo Task cho Input
  800076e:	f107 035c 	add.w	r3, r7, #92	@ 0x5c
  8000772:	2224      	movs	r2, #36	@ 0x24
  8000774:	2100      	movs	r1, #0
@@ -1034,7 +1034,7 @@ void App_Init_FreeRTOS(void) {
  800079a:	4a2b      	ldr	r2, [pc, #172]	@ (8000848 <App_Init_FreeRTOS+0x158>)
  800079c:	6013      	str	r3, [r2, #0]
 
-    const osThreadAttr_t auth_attr = { .name = "AuthTask", .stack_size = 256 * 4, .priority = osPriorityAboveNormal };
+    const osThreadAttr_t auth_attr = { .name = "AuthTask", .stack_size = 256 * 4, .priority = osPriorityAboveNormal }; // Tạo Task cho Auth
  800079e:	f107 0338 	add.w	r3, r7, #56	@ 0x38
  80007a2:	2224      	movs	r2, #36	@ 0x24
  80007a4:	2100      	movs	r1, #0
@@ -1055,9 +1055,9 @@ void App_Init_FreeRTOS(void) {
  80007c8:	4603      	mov	r3, r0
  80007ca:	4a22      	ldr	r2, [pc, #136]	@ (8000854 <App_Init_FreeRTOS+0x164>)
  80007cc:	6013      	str	r3, [r2, #0]
-
-    // --- KHỞI TẠO SEMAPHORE VÀ TASK CHO BUZZER ---
-    const osSemaphoreAttr_t sem_attr = { .name = "buzzerSem" };
+    
+    // Tạo Semaphore và Task cho Buzzer
+    const osSemaphoreAttr_t sem_attr = { .name = "buzzerSem" };    // Tạo Semaphore cho Buzzer    
  80007ce:	f107 0328 	add.w	r3, r7, #40	@ 0x28
  80007d2:	2200      	movs	r2, #0
  80007d4:	601a      	str	r2, [r3, #0]
@@ -1076,7 +1076,7 @@ void App_Init_FreeRTOS(void) {
  80007f0:	4a1a      	ldr	r2, [pc, #104]	@ (800085c <App_Init_FreeRTOS+0x16c>)
  80007f2:	6013      	str	r3, [r2, #0]
 
-    const osThreadAttr_t buzzer_attr = { .name = "BuzzerTask", .stack_size = 128 * 4, .priority = osPriorityNormal };
+    const osThreadAttr_t buzzer_attr = { .name = "BuzzerTask", .stack_size = 128 * 4, .priority = osPriorityNormal }; // Tạo Task cho Buzzer
  80007f4:	1d3b      	adds	r3, r7, #4
  80007f6:	2224      	movs	r2, #36	@ 0x24
  80007f8:	2100      	movs	r1, #0
@@ -1119,10 +1119,11 @@ void App_Init_FreeRTOS(void) {
  8000864:	08000ee9 	.word	0x08000ee9
 
 08000868 <Buzzer_Fail>:
-void Buzzer_Fail(void) {
+
+void Buzzer_Fail(void) {         // Hàm xử lý khi sai mã PIN
  8000868:	b580      	push	{r7, lr}
  800086a:	af00      	add	r7, sp, #0
-    if (error_count >= 3) {
+    if (error_count >= 3) {     // Nếu sai quá 3 lần
  800086c:	4b0b      	ldr	r3, [pc, #44]	@ (800089c <Buzzer_Fail+0x34>)
  800086e:	781b      	ldrb	r3, [r3, #0]
  8000870:	2b02      	cmp	r3, #2
@@ -1158,15 +1159,16 @@ void Buzzer_Fail(void) {
  80008a8:	200000d4 	.word	0x200000d4
 
 080008ac <Task_Input>:
-// --- TASK 1: QUÉT CẢM BIẾN ---
-void Task_Input(void *argument) {
+
+// TASK 1: QUÉT CẢM BIẾN
+void Task_Input(void *argument) {  // Task xử lý quét cảm biến và lấy dữ liệu nhập
  80008ac:	b580      	push	{r7, lr}
  80008ae:	b086      	sub	sp, #24
  80008b0:	af00      	add	r7, sp, #0
  80008b2:	6078      	str	r0, [r7, #4]
-    InputData_t data;
-    for(;;) {
-        if (!isEnrolling) {
+    InputData_t data;               // Tạo biến Data để chứa dữ liệu
+    for(;;) {                       // Vòng lặp vô tận
+        if (!isEnrolling) {         // Nếu không ở chế độ đăng ký
  80008b4:	4b33      	ldr	r3, [pc, #204]	@ (8000984 <Task_Input+0xd8>)
  80008b6:	781b      	ldrb	r3, [r3, #0]
  80008b8:	b2db      	uxtb	r3, r3
@@ -1174,12 +1176,12 @@ void Task_Input(void *argument) {
  80008be:	b2db      	uxtb	r3, r3
  80008c0:	2b00      	cmp	r3, #0
  80008c2:	d03f      	beq.n	8000944 <Task_Input+0x98>
-            int fingerID = AS608_CheckFingerprint();
+            int fingerID = AS608_CheckFingerprint();     // Quét dấu vân tay
  80008c4:	f000 fc26 	bl	8001114 <AS608_CheckFingerprint>
  80008c8:	6178      	str	r0, [r7, #20]
-            static int lastID = 0;
+            static int lastID = 0;                       // Biến lưu ID cuối cùng
 
-            if ((fingerID > 0) && (fingerID != lastID)) {
+            if ((fingerID > 0) && (fingerID != lastID)) { // Nếu có vân tay đúng
  80008ca:	697b      	ldr	r3, [r7, #20]
  80008cc:	2b00      	cmp	r3, #0
  80008ce:	dd19      	ble.n	8000904 <Task_Input+0x58>
@@ -1188,30 +1190,30 @@ void Task_Input(void *argument) {
  80008d4:	697a      	ldr	r2, [r7, #20]
  80008d6:	429a      	cmp	r2, r3
  80008d8:	d014      	beq.n	8000904 <Task_Input+0x58>
-                data.dataSource = SRC_FINGER;
+                data.dataSource = SRC_FINGER;               // Lưu dữ liệu
  80008da:	2301      	movs	r3, #1
  80008dc:	733b      	strb	r3, [r7, #12]
-                data.value = (uint16_t)fingerID;
+                data.value = (uint16_t)fingerID;            // Lưu ID
  80008de:	697b      	ldr	r3, [r7, #20]
  80008e0:	b29b      	uxth	r3, r3
  80008e2:	81fb      	strh	r3, [r7, #14]
-                osMessageQueuePut(inputQueueHandle, &data, 0, 100);
+                osMessageQueuePut(inputQueueHandle, &data, 0, 100); // Gửi dữ liệu vào Queue
  80008e4:	4b29      	ldr	r3, [pc, #164]	@ (800098c <Task_Input+0xe0>)
  80008e6:	6818      	ldr	r0, [r3, #0]
  80008e8:	f107 010c 	add.w	r1, r7, #12
  80008ec:	2364      	movs	r3, #100	@ 0x64
  80008ee:	2200      	movs	r2, #0
  80008f0:	f005 fc5a 	bl	80061a8 <osMessageQueuePut>
-                lastID = fingerID;
+                lastID = fingerID;                          // Lưu ID
  80008f4:	4a24      	ldr	r2, [pc, #144]	@ (8000988 <Task_Input+0xdc>)
  80008f6:	697b      	ldr	r3, [r7, #20]
  80008f8:	6013      	str	r3, [r2, #0]
-                osDelay(1000);
+                osDelay(1000);                              // Chờ 1 giây
  80008fa:	f44f 707a 	mov.w	r0, #1000	@ 0x3e8
  80008fe:	f005 f8a1 	bl	8005a44 <osDelay>
  8000902:	e01f      	b.n	8000944 <Task_Input+0x98>
             }
-            else if ((fingerID == -1) && (lastID != -1)) {
+            else if ((fingerID == -1) && (lastID != -1)) { // Nếu không có vân tay
  8000904:	697b      	ldr	r3, [r7, #20]
  8000906:	f1b3 3fff 	cmp.w	r3, #4294967295
  800090a:	d115      	bne.n	8000938 <Task_Input+0x8c>
@@ -1219,42 +1221,42 @@ void Task_Input(void *argument) {
  800090e:	681b      	ldr	r3, [r3, #0]
  8000910:	f1b3 3fff 	cmp.w	r3, #4294967295
  8000914:	d010      	beq.n	8000938 <Task_Input+0x8c>
-                data.dataSource = SRC_FINGER_FAIL;
+                data.dataSource = SRC_FINGER_FAIL;          // Lưu dữ liệu
  8000916:	2303      	movs	r3, #3
  8000918:	733b      	strb	r3, [r7, #12]
-                data.value = 0;
+                data.value = 0;                             // Lưu ID
  800091a:	2300      	movs	r3, #0
  800091c:	81fb      	strh	r3, [r7, #14]
-                osMessageQueuePut(inputQueueHandle, &data, 0, 100);
+                osMessageQueuePut(inputQueueHandle, &data, 0, 100);  // Gửi dữ liệu vào Queue
  800091e:	4b1b      	ldr	r3, [pc, #108]	@ (800098c <Task_Input+0xe0>)
  8000920:	6818      	ldr	r0, [r3, #0]
  8000922:	f107 010c 	add.w	r1, r7, #12
  8000926:	2364      	movs	r3, #100	@ 0x64
  8000928:	2200      	movs	r2, #0
  800092a:	f005 fc3d 	bl	80061a8 <osMessageQueuePut>
-                lastID = -1;
+                lastID = -1;                                // Cập nhật lại ID
  800092e:	4b16      	ldr	r3, [pc, #88]	@ (8000988 <Task_Input+0xdc>)
  8000930:	f04f 32ff 	mov.w	r2, #4294967295
  8000934:	601a      	str	r2, [r3, #0]
  8000936:	e005      	b.n	8000944 <Task_Input+0x98>
             }
-            else if (fingerID == 0) {
+            else if (fingerID == 0) {                     // Nếu không có vân tay
  8000938:	697b      	ldr	r3, [r7, #20]
  800093a:	2b00      	cmp	r3, #0
  800093c:	d102      	bne.n	8000944 <Task_Input+0x98>
-            	lastID = 0;
+            	lastID = 0;                                   // Cập nhật lại ID
  800093e:	4b12      	ldr	r3, [pc, #72]	@ (8000988 <Task_Input+0xdc>)
  8000940:	2200      	movs	r2, #0
  8000942:	601a      	str	r2, [r3, #0]
             }
         }
 
-        static char lastKey = 0;
-        char key = Keypad_GetKey();
+        static char lastKey = 0;                          // Biến lưu phím cuối cùng
+        char key = Keypad_GetKey();                       // Lấy phím từ bàn phím   
  8000944:	f000 fd50 	bl	80013e8 <Keypad_GetKey>
  8000948:	4603      	mov	r3, r0
  800094a:	74fb      	strb	r3, [r7, #19]
-        if (key != 0 && key != lastKey) {
+        if (key != 0 && key != lastKey) {                 // Nếu có phím bấm
  800094c:	7cfb      	ldrb	r3, [r7, #19]
  800094e:	2b00      	cmp	r3, #0
  8000950:	d011      	beq.n	8000976 <Task_Input+0xca>
@@ -1263,14 +1265,14 @@ void Task_Input(void *argument) {
  8000956:	7cfa      	ldrb	r2, [r7, #19]
  8000958:	429a      	cmp	r2, r3
  800095a:	d00c      	beq.n	8000976 <Task_Input+0xca>
-            data.dataSource = SRC_KEYPAD;
+            data.dataSource = SRC_KEYPAD;                   // Lưu dữ liệu
  800095c:	2300      	movs	r3, #0
  800095e:	733b      	strb	r3, [r7, #12]
-            data.value = key;
+            data.value = key;                               // Lưu ID
  8000960:	7cfb      	ldrb	r3, [r7, #19]
  8000962:	b29b      	uxth	r3, r3
  8000964:	81fb      	strh	r3, [r7, #14]
-            osMessageQueuePut(inputQueueHandle, &data, 0, 0);
+            osMessageQueuePut(inputQueueHandle, &data, 0, 0);   // Gửi dữ liệu vào Queue
  8000966:	4b09      	ldr	r3, [pc, #36]	@ (800098c <Task_Input+0xe0>)
  8000968:	6818      	ldr	r0, [r3, #0]
  800096a:	f107 010c 	add.w	r1, r7, #12
@@ -1278,14 +1280,14 @@ void Task_Input(void *argument) {
  8000970:	2200      	movs	r2, #0
  8000972:	f005 fc19 	bl	80061a8 <osMessageQueuePut>
         }
-        lastKey = key;
+        lastKey = key;                                    // Cập nhật lại lastKey
  8000976:	4a06      	ldr	r2, [pc, #24]	@ (8000990 <Task_Input+0xe4>)
  8000978:	7cfb      	ldrb	r3, [r7, #19]
  800097a:	7013      	strb	r3, [r2, #0]
-        osDelay(150);
+        osDelay(150);                                     // Chờ 150ms
  800097c:	2096      	movs	r0, #150	@ 0x96
  800097e:	f005 f861 	bl	8005a44 <osDelay>
-    for(;;) {
+    for(;;) {                       // Vòng lặp vô tận
  8000982:	e797      	b.n	80008b4 <Task_Input+0x8>
  8000984:	200000bc 	.word	0x200000bc
  8000988:	20000124 	.word	0x20000124
@@ -1296,16 +1298,15 @@ void Task_Input(void *argument) {
     }
 }
 
-// --- TASK 2: XỬ LÝ CHÍNH ---
-void Task_Auth(void *argument) {
+// TASK 2: XỬ LÝ CHÍNH
+void Task_Auth(void *argument) {                                // Khởi tạo task xử lý chính
  8000994:	b580      	push	{r7, lr}
- 8000996:	b09e      	sub	sp, #120	@ 0x78
+ 8000996:	b0a2      	sub	sp, #136	@ 0x88
  8000998:	af02      	add	r7, sp, #8
  800099a:	6078      	str	r0, [r7, #4]
     Load_PIN_From_Flash(); // Đọc mã PIN từ bộ nhớ Flash chống mất điện
  800099c:	f7ff fd92 	bl	80004c4 <Load_PIN_From_Flash>
-
-    CLCD_I2C_Init(&LCD1, &hi2c1, 0x4E, 16, 2);
+    CLCD_I2C_Init(&LCD1, &hi2c1, 0x4E, 16, 2);                   // Khởi tạo LCD
  80009a0:	2302      	movs	r3, #2
  80009a2:	9300      	str	r3, [sp, #0]
  80009a4:	2310      	movs	r3, #16
@@ -1313,14 +1314,14 @@ void Task_Auth(void *argument) {
  80009a8:	49c4      	ldr	r1, [pc, #784]	@ (8000cbc <Task_Auth+0x328>)
  80009aa:	48c5      	ldr	r0, [pc, #788]	@ (8000cc0 <Task_Auth+0x32c>)
  80009ac:	f7ff fc4f 	bl	800024e <CLCD_I2C_Init>
-    LCD_Clear();
+    LCD_Clear();                                                  // Xóa màn hình
  80009b0:	f7ff fdc8 	bl	8000544 <LCD_Clear>
-    LCD_Print(2, 0, "SMART LOCK");
+    LCD_Print(2, 0, "SMART LOCK");                              // In dòng "SMART LOCK"
  80009b4:	4ac3      	ldr	r2, [pc, #780]	@ (8000cc4 <Task_Auth+0x330>)
  80009b6:	2100      	movs	r1, #0
  80009b8:	2002      	movs	r0, #2
  80009ba:	f7ff fd9d 	bl	80004f8 <LCD_Print>
-    LCD_Print(3, 1, "SAN SANG...");
+    LCD_Print(3, 1, "SAN SANG...");                             // In dòng "SAN SANG..."
  80009be:	4ac2      	ldr	r2, [pc, #776]	@ (8000cc8 <Task_Auth+0x334>)
  80009c0:	2101      	movs	r1, #1
  80009c2:	2003      	movs	r0, #3
@@ -1333,271 +1334,270 @@ void Task_Auth(void *argument) {
  80009cc:	48c0      	ldr	r0, [pc, #768]	@ (8000cd0 <Task_Auth+0x33c>)
  80009ce:	f004 f969 	bl	8004ca4 <HAL_UART_Receive_IT>
 
-    InputData_t rxData;
-    uint8_t systemMode = 0; // 0: Menu, 1: Vân tay, 2: Bàn phím
+    InputData_t rxData;                                // Tạo biến Data để chứa dữ liệu
+    uint8_t systemMode = 0;                             // Tạo biến systemMode để chứa chế độ hệ thống
  80009d2:	2300      	movs	r3, #0
- 80009d4:	f887 306f 	strb.w	r3, [r7, #111]	@ 0x6f
+ 80009d4:	f887 307f 	strb.w	r3, [r7, #127]	@ 0x7f
 
-    for(;;) {
-        if (osMessageQueueGet(inputQueueHandle, &rxData, NULL, osWaitForever) == osOK) {
+    for(;;) {                                            // Vòng lặp vô tận
+        if (osMessageQueueGet(inputQueueHandle, &rxData, NULL, osWaitForever) == osOK) { // Nếu nhận được dữ liệu
  80009d8:	4bbe      	ldr	r3, [pc, #760]	@ (8000cd4 <Task_Auth+0x340>)
  80009da:	6818      	ldr	r0, [r3, #0]
- 80009dc:	f107 0160 	add.w	r1, r7, #96	@ 0x60
+ 80009dc:	f107 0170 	add.w	r1, r7, #112	@ 0x70
  80009e0:	f04f 33ff 	mov.w	r3, #4294967295
  80009e4:	2200      	movs	r2, #0
  80009e6:	f005 fc3f 	bl	8006268 <osMessageQueueGet>
  80009ea:	4603      	mov	r3, r0
  80009ec:	2b00      	cmp	r3, #0
  80009ee:	d1f3      	bne.n	80009d8 <Task_Auth+0x44>
-            bool unlock = false;
+            bool unlock = false;                            // Tạo biến unlock để chứa trạng thái khóa
  80009f0:	2300      	movs	r3, #0
- 80009f2:	f887 306e 	strb.w	r3, [r7, #110]	@ 0x6e
-            char msg_success[40] = "";
- 80009f6:	f107 0328 	add.w	r3, r7, #40	@ 0x28
+ 80009f2:	f887 307e 	strb.w	r3, [r7, #126]	@ 0x7e
+            char msg_success[40] = "";                      // Tạo biến msg_success để chứa thông báo
+ 80009f6:	f107 0348 	add.w	r3, r7, #72	@ 0x48
  80009fa:	2228      	movs	r2, #40	@ 0x28
  80009fc:	2100      	movs	r1, #0
  80009fe:	4618      	mov	r0, r3
  8000a00:	f008 ff64 	bl	80098cc <memset>
 
-            if (rxData.dataSource == SRC_SYSTEM) {
- 8000a04:	f897 3060 	ldrb.w	r3, [r7, #96]	@ 0x60
+            if (rxData.dataSource == SRC_SYSTEM) {          // Nếu dữ liệu từ system
+ 8000a04:	f897 3070 	ldrb.w	r3, [r7, #112]	@ 0x70
  8000a08:	2b63      	cmp	r3, #99	@ 0x63
  8000a0a:	d11e      	bne.n	8000a4a <Task_Auth+0xb6>
-                if (rxData.value == EVT_AUTOLOCK) {
- 8000a0c:	f8b7 3062 	ldrh.w	r3, [r7, #98]	@ 0x62
+                if (rxData.value == EVT_AUTOLOCK) {         // Nếu dữ liệu là EVT_AUTOLOCK
+ 8000a0c:	f8b7 3072 	ldrh.w	r3, [r7, #114]	@ 0x72
  8000a10:	2b01      	cmp	r3, #1
  8000a12:	f040 8236 	bne.w	8000e82 <Task_Auth+0x4ee>
-                    Lock_Close();
+                    Lock_Close();                               // Đóng khóa
  8000a16:	f000 ff85 	bl	8001924 <Lock_Close>
-                    LCD_Clear();
+                    LCD_Clear();                                // Xóa màn hình
  8000a1a:	f7ff fd93 	bl	8000544 <LCD_Clear>
-                    LCD_Print(2,0,"DA TU KHOA");
+                    LCD_Print(2,0,"DA TU KHOA");                // In dòng "DA TU KHOA"
  8000a1e:	4aae      	ldr	r2, [pc, #696]	@ (8000cd8 <Task_Auth+0x344>)
  8000a20:	2100      	movs	r1, #0
  8000a22:	2002      	movs	r0, #2
  8000a24:	f7ff fd68 	bl	80004f8 <LCD_Print>
-                    osDelay(800);
+                    osDelay(800);                               // Chờ 800ms
  8000a28:	f44f 7048 	mov.w	r0, #800	@ 0x320
  8000a2c:	f005 f80a 	bl	8005a44 <osDelay>
-                    LCD_Clear();
+                    LCD_Clear();                                // Xóa màn hình
  8000a30:	f7ff fd88 	bl	8000544 <LCD_Clear>
-                    LCD_Print(2,0,"SMART LOCK");
+                    LCD_Print(2,0,"SMART LOCK");              // In dòng "SMART LOCK"
  8000a34:	4aa3      	ldr	r2, [pc, #652]	@ (8000cc4 <Task_Auth+0x330>)
  8000a36:	2100      	movs	r1, #0
  8000a38:	2002      	movs	r0, #2
  8000a3a:	f7ff fd5d 	bl	80004f8 <LCD_Print>
-                    LCD_Print(3,1,"SAN SANG...");
+                    LCD_Print(3,1,"SAN SANG...");             // In dòng "SAN SANG..."
  8000a3e:	4aa2      	ldr	r2, [pc, #648]	@ (8000cc8 <Task_Auth+0x334>)
  8000a40:	2101      	movs	r1, #1
  8000a42:	2003      	movs	r0, #3
  8000a44:	f7ff fd58 	bl	80004f8 <LCD_Print>
                 }
-                continue;
+                continue;                                       // Tiếp tục vòng lặp
  8000a48:	e21b      	b.n	8000e82 <Task_Auth+0x4ee>
             }
 
             // LỆNH TỪ APP: YÊU CẦU ĐĂNG KÝ VÂN TAY TỪ XA
-            if (rxData.dataSource == SRC_REMOTE_ENROLL) {
- 8000a4a:	f897 3060 	ldrb.w	r3, [r7, #96]	@ 0x60
+            if (rxData.dataSource == SRC_REMOTE_ENROLL) {   // Nếu dữ liệu từ remote
+ 8000a4a:	f897 3070 	ldrb.w	r3, [r7, #112]	@ 0x70
  8000a4e:	2b05      	cmp	r3, #5
  8000a50:	d148      	bne.n	8000ae4 <Task_Auth+0x150>
-                uint16_t enroll_id = rxData.value;
- 8000a52:	f8b7 3062 	ldrh.w	r3, [r7, #98]	@ 0x62
- 8000a56:	f8a7 3068 	strh.w	r3, [r7, #104]	@ 0x68
-                LCD_Clear();
+                uint16_t enroll_id = rxData.value;          // Lấy ID từ data
+ 8000a52:	f8b7 3072 	ldrh.w	r3, [r7, #114]	@ 0x72
+ 8000a56:	f8a7 3078 	strh.w	r3, [r7, #120]	@ 0x78
+                LCD_Clear();                                // Xóa màn hình
  8000a5a:	f7ff fd73 	bl	8000544 <LCD_Clear>
-                char buf[16];
-                sprintf(buf, "ID %d: DAT TAY", enroll_id);
- 8000a5e:	f8b7 2068 	ldrh.w	r2, [r7, #104]	@ 0x68
- 8000a62:	f107 0350 	add.w	r3, r7, #80	@ 0x50
+                char buf[32];                               // Tạo buffer để chứa chuỗi
+                sprintf(buf, "ID %d: DAT TAY", enroll_id);    // Tạo chuỗi thông báo
+ 8000a5e:	f8b7 2078 	ldrh.w	r2, [r7, #120]	@ 0x78
+ 8000a62:	f107 0308 	add.w	r3, r7, #8
  8000a66:	499d      	ldr	r1, [pc, #628]	@ (8000cdc <Task_Auth+0x348>)
  8000a68:	4618      	mov	r0, r3
  8000a6a:	f008 ff0d 	bl	8009888 <siprintf>
-                LCD_Print(0, 0, buf);
- 8000a6e:	f107 0350 	add.w	r3, r7, #80	@ 0x50
+                LCD_Print(0, 0, buf);                       // In chuỗi thông báo
+ 8000a6e:	f107 0308 	add.w	r3, r7, #8
  8000a72:	461a      	mov	r2, r3
  8000a74:	2100      	movs	r1, #0
  8000a76:	2000      	movs	r0, #0
  8000a78:	f7ff fd3e 	bl	80004f8 <LCD_Print>
 
-                isEnrolling = true;
+                isEnrolling = true;                         // Set cờ
  8000a7c:	4b98      	ldr	r3, [pc, #608]	@ (8000ce0 <Task_Auth+0x34c>)
  8000a7e:	2201      	movs	r2, #1
  8000a80:	701a      	strb	r2, [r3, #0]
-                int res = AS608_Enroll(enroll_id);
- 8000a82:	f8b7 3068 	ldrh.w	r3, [r7, #104]	@ 0x68
+                int res = AS608_Enroll(enroll_id);          // Đăng ký vân tay
+ 8000a82:	f8b7 3078 	ldrh.w	r3, [r7, #120]	@ 0x78
  8000a86:	4618      	mov	r0, r3
  8000a88:	f000 fbea 	bl	8001260 <AS608_Enroll>
- 8000a8c:	6678      	str	r0, [r7, #100]	@ 0x64
-                isEnrolling = false;
+ 8000a8c:	6778      	str	r0, [r7, #116]	@ 0x74
+                isEnrolling = false;                        // Reset cờ
  8000a8e:	4b94      	ldr	r3, [pc, #592]	@ (8000ce0 <Task_Auth+0x34c>)
  8000a90:	2200      	movs	r2, #0
  8000a92:	701a      	strb	r2, [r3, #0]
 
-                if (res == 1) {
- 8000a94:	6e7b      	ldr	r3, [r7, #100]	@ 0x64
+                if (res == 1) {                             // Nếu đăng ký thành công
+ 8000a94:	6f7b      	ldr	r3, [r7, #116]	@ 0x74
  8000a96:	2b01      	cmp	r3, #1
  8000a98:	d114      	bne.n	8000ac4 <Task_Auth+0x130>
-                    // Đăng ký thành công, báo cho App
-                    char msg[32];
-                    sprintf(msg, "ENROLL_SUCCESS:%d\n", enroll_id);
- 8000a9a:	f8b7 2068 	ldrh.w	r2, [r7, #104]	@ 0x68
- 8000a9e:	f107 0308 	add.w	r3, r7, #8
+                    char msg[32];                          // Tạo buffer để chứa chuỗi
+                    sprintf(msg, "ENROLL_SUCCESS:%d\n", enroll_id);  // Tạo chuỗi thông báo
+ 8000a9a:	f8b7 2078 	ldrh.w	r2, [r7, #120]	@ 0x78
+ 8000a9e:	f107 0328 	add.w	r3, r7, #40	@ 0x28
  8000aa2:	4990      	ldr	r1, [pc, #576]	@ (8000ce4 <Task_Auth+0x350>)
  8000aa4:	4618      	mov	r0, r3
  8000aa6:	f008 feef 	bl	8009888 <siprintf>
-                    HAL_UART_Transmit(&huart2, (uint8_t*)msg, strlen(msg), 100);
- 8000aaa:	f107 0308 	add.w	r3, r7, #8
+                    HAL_UART_Transmit(&huart2, (uint8_t*)msg, strlen(msg), 100);  // Gửi chuỗi thông báo
+ 8000aaa:	f107 0328 	add.w	r3, r7, #40	@ 0x28
  8000aae:	4618      	mov	r0, r3
  8000ab0:	f7ff fb58 	bl	8000164 <strlen>
  8000ab4:	4603      	mov	r3, r0
  8000ab6:	b29a      	uxth	r2, r3
- 8000ab8:	f107 0108 	add.w	r1, r7, #8
+ 8000ab8:	f107 0128 	add.w	r1, r7, #40	@ 0x28
  8000abc:	2364      	movs	r3, #100	@ 0x64
  8000abe:	4884      	ldr	r0, [pc, #528]	@ (8000cd0 <Task_Auth+0x33c>)
  8000ac0:	f003 ffce 	bl	8004a60 <HAL_UART_Transmit>
                 }
 
-                LCD_Clear();
+                LCD_Clear();                                // Xóa màn hình
  8000ac4:	f7ff fd3e 	bl	8000544 <LCD_Clear>
-                LCD_Print(2, 0, "SMART LOCK");
+                LCD_Print(2, 0, "SMART LOCK");              // In dòng "SMART LOCK"
  8000ac8:	4a7e      	ldr	r2, [pc, #504]	@ (8000cc4 <Task_Auth+0x330>)
  8000aca:	2100      	movs	r1, #0
  8000acc:	2002      	movs	r0, #2
  8000ace:	f7ff fd13 	bl	80004f8 <LCD_Print>
-                LCD_Print(3, 1, "SAN SANG...");
+                LCD_Print(3, 1, "SAN SANG...");             // In dòng "SAN SANG..."
  8000ad2:	4a7d      	ldr	r2, [pc, #500]	@ (8000cc8 <Task_Auth+0x334>)
  8000ad4:	2101      	movs	r1, #1
  8000ad6:	2003      	movs	r0, #3
  8000ad8:	f7ff fd0e 	bl	80004f8 <LCD_Print>
-                systemMode = 0;
+                systemMode = 0;                             // Reset systemMode
  8000adc:	2300      	movs	r3, #0
- 8000ade:	f887 306f 	strb.w	r3, [r7, #111]	@ 0x6f
-                continue;
+ 8000ade:	f887 307f 	strb.w	r3, [r7, #127]	@ 0x7f
+                continue;                                   // Tiếp tục vòng lặp
  8000ae2:	e1cf      	b.n	8000e84 <Task_Auth+0x4f0>
             }
 
             // LỆNH TỪ APP: YÊU CẦU XÓA VÂN TAY TỪ XA
-            if (rxData.dataSource == SRC_REMOTE_DELETE) {
- 8000ae4:	f897 3060 	ldrb.w	r3, [r7, #96]	@ 0x60
+            if (rxData.dataSource == SRC_REMOTE_DELETE) {   // Nếu dữ liệu từ remote
+ 8000ae4:	f897 3070 	ldrb.w	r3, [r7, #112]	@ 0x70
  8000ae8:	2b06      	cmp	r3, #6
  8000aea:	d123      	bne.n	8000b34 <Task_Auth+0x1a0>
-                uint16_t del_id = rxData.value;
- 8000aec:	f8b7 3062 	ldrh.w	r3, [r7, #98]	@ 0x62
- 8000af0:	f8a7 306a 	strh.w	r3, [r7, #106]	@ 0x6a
-                AS608_DeleteChar(del_id); // Xóa khỏi bộ nhớ Flash
- 8000af4:	f8b7 306a 	ldrh.w	r3, [r7, #106]	@ 0x6a
+                uint16_t del_id = rxData.value;          // Lấy ID từ data
+ 8000aec:	f8b7 3072 	ldrh.w	r3, [r7, #114]	@ 0x72
+ 8000af0:	f8a7 307a 	strh.w	r3, [r7, #122]	@ 0x7a
+                AS608_DeleteChar(del_id);                  // Xóa khỏi bộ nhớ Flash
+ 8000af4:	f8b7 307a 	ldrh.w	r3, [r7, #122]	@ 0x7a
  8000af8:	4618      	mov	r0, r3
  8000afa:	f000 fc2d 	bl	8001358 <AS608_DeleteChar>
 
-                LCD_Clear();
+                LCD_Clear();                                // Xóa màn hình
  8000afe:	f7ff fd21 	bl	8000544 <LCD_Clear>
-                LCD_Print(1, 0, "XOA ID OK!");
+                LCD_Print(1, 0, "XOA ID OK!");              // In dòng "XOA ID OK!"
  8000b02:	4a79      	ldr	r2, [pc, #484]	@ (8000ce8 <Task_Auth+0x354>)
  8000b04:	2100      	movs	r1, #0
  8000b06:	2001      	movs	r0, #1
  8000b08:	f7ff fcf6 	bl	80004f8 <LCD_Print>
-                osDelay(1500);
+                osDelay(1500);                              // Chờ 1500ms
  8000b0c:	f240 50dc 	movw	r0, #1500	@ 0x5dc
  8000b10:	f004 ff98 	bl	8005a44 <osDelay>
 
-                LCD_Clear();
+                LCD_Clear();                                // Xóa màn hình
  8000b14:	f7ff fd16 	bl	8000544 <LCD_Clear>
-                LCD_Print(2, 0, "SMART LOCK");
+                LCD_Print(2, 0, "SMART LOCK");              // In dòng "SMART LOCK"
  8000b18:	4a6a      	ldr	r2, [pc, #424]	@ (8000cc4 <Task_Auth+0x330>)
  8000b1a:	2100      	movs	r1, #0
  8000b1c:	2002      	movs	r0, #2
  8000b1e:	f7ff fceb 	bl	80004f8 <LCD_Print>
-                LCD_Print(3, 1, "SAN SANG...");
+                LCD_Print(3, 1, "SAN SANG...");             // In dòng "SAN SANG..."
  8000b22:	4a69      	ldr	r2, [pc, #420]	@ (8000cc8 <Task_Auth+0x334>)
  8000b24:	2101      	movs	r1, #1
  8000b26:	2003      	movs	r0, #3
  8000b28:	f7ff fce6 	bl	80004f8 <LCD_Print>
-                systemMode = 0;
+                systemMode = 0;                             // Reset systemMode
  8000b2c:	2300      	movs	r3, #0
- 8000b2e:	f887 306f 	strb.w	r3, [r7, #111]	@ 0x6f
-                continue;
+ 8000b2e:	f887 307f 	strb.w	r3, [r7, #127]	@ 0x7f
+                continue;                                   // Tiếp tục vòng lặp
  8000b32:	e1a7      	b.n	8000e84 <Task_Auth+0x4f0>
             }
 
             // LỆNH TỪ APP: YÊU CẦU ĐỔI PIN
-            if (rxData.dataSource == SRC_REMOTE_CHANGE_PIN) {
- 8000b34:	f897 3060 	ldrb.w	r3, [r7, #96]	@ 0x60
+            if (rxData.dataSource == SRC_REMOTE_CHANGE_PIN) {   // Nếu dữ liệu từ remote
+ 8000b34:	f897 3070 	ldrb.w	r3, [r7, #112]	@ 0x70
  8000b38:	2b07      	cmp	r3, #7
  8000b3a:	d121      	bne.n	8000b80 <Task_Auth+0x1ec>
-                strcpy(correct_PIN, pending_new_pin);
+                strcpy(correct_PIN, pending_new_pin);       // Copy PIN mới vào correct_PIN
  8000b3c:	496b      	ldr	r1, [pc, #428]	@ (8000cec <Task_Auth+0x358>)
  8000b3e:	486c      	ldr	r0, [pc, #432]	@ (8000cf0 <Task_Auth+0x35c>)
  8000b40:	f008 ff7c 	bl	8009a3c <strcpy>
-                Save_PIN_To_Flash(correct_PIN); // Lưu vĩnh viễn vào Flash
+                Save_PIN_To_Flash(correct_PIN);             // Lưu vĩnh viễn vào Flash
  8000b44:	486a      	ldr	r0, [pc, #424]	@ (8000cf0 <Task_Auth+0x35c>)
  8000b46:	f7ff fc73 	bl	8000430 <Save_PIN_To_Flash>
                 
-                LCD_Clear();
+                LCD_Clear();                                // Xóa màn hình
  8000b4a:	f7ff fcfb 	bl	8000544 <LCD_Clear>
-                LCD_Print(1, 0, "DOI PIN OK!");
+                LCD_Print(1, 0, "DOI PIN OK!");             // In dòng "DOI PIN OK!"
  8000b4e:	4a69      	ldr	r2, [pc, #420]	@ (8000cf4 <Task_Auth+0x360>)
  8000b50:	2100      	movs	r1, #0
  8000b52:	2001      	movs	r0, #1
  8000b54:	f7ff fcd0 	bl	80004f8 <LCD_Print>
-                osDelay(1500);
+                osDelay(1500);                              // Chờ 1500ms
  8000b58:	f240 50dc 	movw	r0, #1500	@ 0x5dc
  8000b5c:	f004 ff72 	bl	8005a44 <osDelay>
 
-                LCD_Clear();
+                LCD_Clear();                                // Xóa màn hình
  8000b60:	f7ff fcf0 	bl	8000544 <LCD_Clear>
-                LCD_Print(2, 0, "SMART LOCK");
+                LCD_Print(2, 0, "SMART LOCK");              // In dòng "SMART LOCK"
  8000b64:	4a57      	ldr	r2, [pc, #348]	@ (8000cc4 <Task_Auth+0x330>)
  8000b66:	2100      	movs	r1, #0
  8000b68:	2002      	movs	r0, #2
  8000b6a:	f7ff fcc5 	bl	80004f8 <LCD_Print>
-                LCD_Print(3, 1, "SAN SANG...");
+                LCD_Print(3, 1, "SAN SANG...");             // In dòng "SAN SANG..."
  8000b6e:	4a56      	ldr	r2, [pc, #344]	@ (8000cc8 <Task_Auth+0x334>)
  8000b70:	2101      	movs	r1, #1
  8000b72:	2003      	movs	r0, #3
  8000b74:	f7ff fcc0 	bl	80004f8 <LCD_Print>
-                systemMode = 0;
+                systemMode = 0;                             // Reset systemMode
  8000b78:	2300      	movs	r3, #0
- 8000b7a:	f887 306f 	strb.w	r3, [r7, #111]	@ 0x6f
-                continue;
+ 8000b7a:	f887 307f 	strb.w	r3, [r7, #127]	@ 0x7f
+                continue;                                   // Tiếp tục vòng lặp
  8000b7e:	e181      	b.n	8000e84 <Task_Auth+0x4f0>
             }
 
             // LỆNH TỪ APP: MỞ KHÓA
-            if (rxData.dataSource == SRC_REMOTE_UNLOCK) {
- 8000b80:	f897 3060 	ldrb.w	r3, [r7, #96]	@ 0x60
+            if (rxData.dataSource == SRC_REMOTE_UNLOCK) {   // Nếu dữ liệu từ remote
+ 8000b80:	f897 3070 	ldrb.w	r3, [r7, #112]	@ 0x70
  8000b84:	2b04      	cmp	r3, #4
  8000b86:	d106      	bne.n	8000b96 <Task_Auth+0x202>
-                unlock = true;
+                unlock = true;                              // Mở khóa
  8000b88:	2301      	movs	r3, #1
- 8000b8a:	f887 306e 	strb.w	r3, [r7, #110]	@ 0x6e
+ 8000b8a:	f887 307e 	strb.w	r3, [r7, #126]	@ 0x7e
                 // Nếu mở từ App thì không gửi báo cáo lại cho App nữa (tránh vòng lặp)
-                strcpy(msg_success, "");
+                strcpy(msg_success, "");                  // Xóa thông báo
  8000b8e:	2300      	movs	r3, #0
- 8000b90:	f887 3028 	strb.w	r3, [r7, #40]	@ 0x28
+ 8000b90:	f887 3048 	strb.w	r3, [r7, #72]	@ 0x48
  8000b94:	e142      	b.n	8000e1c <Task_Auth+0x488>
             }
 
             // CHỌN CHẾ ĐỘ
-            else if (systemMode == 0) {
- 8000b96:	f897 306f 	ldrb.w	r3, [r7, #111]	@ 0x6f
+            else if (systemMode == 0) {               // Nếu systemMode là 0
+ 8000b96:	f897 307f 	ldrb.w	r3, [r7, #127]	@ 0x7f
  8000b9a:	2b00      	cmp	r3, #0
  8000b9c:	d136      	bne.n	8000c0c <Task_Auth+0x278>
-                if (rxData.dataSource == SRC_KEYPAD) {
- 8000b9e:	f897 3060 	ldrb.w	r3, [r7, #96]	@ 0x60
+                if (rxData.dataSource == SRC_KEYPAD) {  // Nếu dữ liệu từ bàn phím
+ 8000b9e:	f897 3070 	ldrb.w	r3, [r7, #112]	@ 0x70
  8000ba2:	2b00      	cmp	r3, #0
  8000ba4:	f040 813a 	bne.w	8000e1c <Task_Auth+0x488>
-                    char key = (char)rxData.value;
- 8000ba8:	f8b7 3062 	ldrh.w	r3, [r7, #98]	@ 0x62
- 8000bac:	f887 306c 	strb.w	r3, [r7, #108]	@ 0x6c
-                    if (key == 'A') {
- 8000bb0:	f897 306c 	ldrb.w	r3, [r7, #108]	@ 0x6c
+                    char key = (char)rxData.value;      // Lấy ký tự từ data
+ 8000ba8:	f8b7 3072 	ldrh.w	r3, [r7, #114]	@ 0x72
+ 8000bac:	f887 307c 	strb.w	r3, [r7, #124]	@ 0x7c
+                    if (key == 'A') {                   // Nếu là 'A'
+ 8000bb0:	f897 307c 	ldrb.w	r3, [r7, #124]	@ 0x7c
  8000bb4:	2b41      	cmp	r3, #65	@ 0x41
  8000bb6:	d116      	bne.n	8000be6 <Task_Auth+0x252>
-                        systemMode = 1;
+                        systemMode = 1;                 // Chuyển sang chế độ vân tay
  8000bb8:	2301      	movs	r3, #1
- 8000bba:	f887 306f 	strb.w	r3, [r7, #111]	@ 0x6f
-                        LCD_Clear();
+ 8000bba:	f887 307f 	strb.w	r3, [r7, #127]	@ 0x7f
+                        LCD_Clear();                    // Xóa màn hình
  8000bbe:	f7ff fcc1 	bl	8000544 <LCD_Clear>
                         LCD_Print(1, 0, "CHE DO: VAN TAY");
  8000bc2:	4a4d      	ldr	r2, [pc, #308]	@ (8000cf8 <Task_Auth+0x364>)
@@ -1609,124 +1609,123 @@ void Task_Auth(void *argument) {
  8000bce:	2101      	movs	r1, #1
  8000bd0:	2003      	movs	r0, #3
  8000bd2:	f7ff fc91 	bl	80004f8 <LCD_Print>
-                        osDelay(1500);
+                        osDelay(1500);                  // Chờ 1500ms
  8000bd6:	f240 50dc 	movw	r0, #1500	@ 0x5dc
  8000bda:	f004 ff33 	bl	8005a44 <osDelay>
-                        pin_index = 0;
+                        pin_index = 0;                  // Reset pin_index
  8000bde:	4b47      	ldr	r3, [pc, #284]	@ (8000cfc <Task_Auth+0x368>)
  8000be0:	2200      	movs	r2, #0
  8000be2:	701a      	strb	r2, [r3, #0]
  8000be4:	e11a      	b.n	8000e1c <Task_Auth+0x488>
                     }
-                    else if (key == 'B') {
- 8000be6:	f897 306c 	ldrb.w	r3, [r7, #108]	@ 0x6c
+                    else if (key == 'B') {              // Nếu là 'B'
+ 8000be6:	f897 307c 	ldrb.w	r3, [r7, #124]	@ 0x7c
  8000bea:	2b42      	cmp	r3, #66	@ 0x42
  8000bec:	f040 8116 	bne.w	8000e1c <Task_Auth+0x488>
-                        systemMode = 2;
+                        systemMode = 2;                 // Chuyển sang chế độ PIN
  8000bf0:	2302      	movs	r3, #2
- 8000bf2:	f887 306f 	strb.w	r3, [r7, #111]	@ 0x6f
-                        LCD_Clear();
+ 8000bf2:	f887 307f 	strb.w	r3, [r7, #127]	@ 0x7f
+                        LCD_Clear();                    // Xóa màn hình
  8000bf6:	f7ff fca5 	bl	8000544 <LCD_Clear>
-                        LCD_Print(0, 0, "NHAP PIN:");
+                        LCD_Print(0, 0, "NHAP PIN:");   // In dòng "NHAP PIN:"
  8000bfa:	4a41      	ldr	r2, [pc, #260]	@ (8000d00 <Task_Auth+0x36c>)
  8000bfc:	2100      	movs	r1, #0
  8000bfe:	2000      	movs	r0, #0
  8000c00:	f7ff fc7a 	bl	80004f8 <LCD_Print>
-                        pin_index = 0;
+                        pin_index = 0;                  // Reset pin_index
  8000c04:	4b3d      	ldr	r3, [pc, #244]	@ (8000cfc <Task_Auth+0x368>)
  8000c06:	2200      	movs	r2, #0
  8000c08:	701a      	strb	r2, [r3, #0]
  8000c0a:	e107      	b.n	8000e1c <Task_Auth+0x488>
                     }
-                    // BỎ NÚT C QUẢN LÝ Ở ĐÂY, ĐÃ DỊCH CHUYỂN LÊN APP
                 }
             }
             // CHẾ ĐỘ VÂN TAY
-            else if (systemMode == 1) {
- 8000c0c:	f897 306f 	ldrb.w	r3, [r7, #111]	@ 0x6f
+            else if (systemMode == 1) {  // Nếu systemMode là 1
+ 8000c0c:	f897 307f 	ldrb.w	r3, [r7, #127]	@ 0x7f
  8000c10:	2b01      	cmp	r3, #1
  8000c12:	d17d      	bne.n	8000d10 <Task_Auth+0x37c>
-                if (rxData.dataSource == SRC_FINGER && rxData.value > 0) {
- 8000c14:	f897 3060 	ldrb.w	r3, [r7, #96]	@ 0x60
+                if (rxData.dataSource == SRC_FINGER && rxData.value > 0) {  // Nếu dữ liệu từ vân tay
+ 8000c14:	f897 3070 	ldrb.w	r3, [r7, #112]	@ 0x70
  8000c18:	2b01      	cmp	r3, #1
  8000c1a:	d110      	bne.n	8000c3e <Task_Auth+0x2aa>
- 8000c1c:	f8b7 3062 	ldrh.w	r3, [r7, #98]	@ 0x62
+ 8000c1c:	f8b7 3072 	ldrh.w	r3, [r7, #114]	@ 0x72
  8000c20:	2b00      	cmp	r3, #0
  8000c22:	d00c      	beq.n	8000c3e <Task_Auth+0x2aa>
-                    unlock = true;
+                    unlock = true;  // Mở khóa
  8000c24:	2301      	movs	r3, #1
- 8000c26:	f887 306e 	strb.w	r3, [r7, #110]	@ 0x6e
+ 8000c26:	f887 307e 	strb.w	r3, [r7, #126]	@ 0x7e
                     // Báo cáo lên App: Truyền số ID vân tay
                     sprintf(msg_success, "DOOR_OPENED:FINGER:%d\n", rxData.value);
- 8000c2a:	f8b7 3062 	ldrh.w	r3, [r7, #98]	@ 0x62
+ 8000c2a:	f8b7 3072 	ldrh.w	r3, [r7, #114]	@ 0x72
  8000c2e:	461a      	mov	r2, r3
- 8000c30:	f107 0328 	add.w	r3, r7, #40	@ 0x28
+ 8000c30:	f107 0348 	add.w	r3, r7, #72	@ 0x48
  8000c34:	4933      	ldr	r1, [pc, #204]	@ (8000d04 <Task_Auth+0x370>)
  8000c36:	4618      	mov	r0, r3
  8000c38:	f008 fe26 	bl	8009888 <siprintf>
  8000c3c:	e0ee      	b.n	8000e1c <Task_Auth+0x488>
                 }
-                else if (rxData.dataSource == SRC_FINGER_FAIL) {
- 8000c3e:	f897 3060 	ldrb.w	r3, [r7, #96]	@ 0x60
+                else if (rxData.dataSource == SRC_FINGER_FAIL) {  // Nếu dữ liệu từ vân tay thất bại
+ 8000c3e:	f897 3070 	ldrb.w	r3, [r7, #112]	@ 0x70
  8000c42:	2b03      	cmp	r3, #3
  8000c44:	d11f      	bne.n	8000c86 <Task_Auth+0x2f2>
-                	error_count++;
+                	error_count++;  // Tăng số lần thất bại
  8000c46:	4b30      	ldr	r3, [pc, #192]	@ (8000d08 <Task_Auth+0x374>)
  8000c48:	781b      	ldrb	r3, [r3, #0]
  8000c4a:	3301      	adds	r3, #1
  8000c4c:	b2da      	uxtb	r2, r3
  8000c4e:	4b2e      	ldr	r3, [pc, #184]	@ (8000d08 <Task_Auth+0x374>)
  8000c50:	701a      	strb	r2, [r3, #0]
-                	Buzzer_Fail();
+                	Buzzer_Fail();  // Báo động
  8000c52:	f7ff fe09 	bl	8000868 <Buzzer_Fail>
-                    LCD_Clear();
+                    LCD_Clear();    // Xóa màn hình
  8000c56:	f7ff fc75 	bl	8000544 <LCD_Clear>
                     LCD_Print(1, 0, "VANTAY KHONG HOP");
  8000c5a:	4a2c      	ldr	r2, [pc, #176]	@ (8000d0c <Task_Auth+0x378>)
  8000c5c:	2100      	movs	r1, #0
  8000c5e:	2001      	movs	r0, #1
  8000c60:	f7ff fc4a 	bl	80004f8 <LCD_Print>
-                    osDelay(2000);
+                    osDelay(2000);  // Chờ 2000ms
  8000c64:	f44f 60fa 	mov.w	r0, #2000	@ 0x7d0
  8000c68:	f004 feec 	bl	8005a44 <osDelay>
-                    LCD_Clear();
+                    LCD_Clear();    // Xóa màn hình
  8000c6c:	f7ff fc6a 	bl	8000544 <LCD_Clear>
-                    LCD_Print(1, 0, "CHE DO: VAN TAY");
+                    LCD_Print(1, 0, "CHE DO: VAN TAY");  // In dòng "CHE DO: VAN TAY"
  8000c70:	4a21      	ldr	r2, [pc, #132]	@ (8000cf8 <Task_Auth+0x364>)
  8000c72:	2100      	movs	r1, #0
  8000c74:	2001      	movs	r0, #1
  8000c76:	f7ff fc3f 	bl	80004f8 <LCD_Print>
-                    LCD_Print(3, 1, "SAN SANG...");
+                    LCD_Print(3, 1, "SAN SANG...");      // In dòng "SAN SANG..."
  8000c7a:	4a13      	ldr	r2, [pc, #76]	@ (8000cc8 <Task_Auth+0x334>)
  8000c7c:	2101      	movs	r1, #1
  8000c7e:	2003      	movs	r0, #3
  8000c80:	f7ff fc3a 	bl	80004f8 <LCD_Print>
  8000c84:	e0ca      	b.n	8000e1c <Task_Auth+0x488>
                 }
-                else if (rxData.dataSource == SRC_KEYPAD) {
- 8000c86:	f897 3060 	ldrb.w	r3, [r7, #96]	@ 0x60
+                else if (rxData.dataSource == SRC_KEYPAD) {  // Nếu dữ liệu từ bàn phím
+ 8000c86:	f897 3070 	ldrb.w	r3, [r7, #112]	@ 0x70
  8000c8a:	2b00      	cmp	r3, #0
  8000c8c:	f040 80c6 	bne.w	8000e1c <Task_Auth+0x488>
-                    if ((char)rxData.value == '*') {
- 8000c90:	f8b7 3062 	ldrh.w	r3, [r7, #98]	@ 0x62
+                    if ((char)rxData.value == '*') {  // Nếu là '*'
+ 8000c90:	f8b7 3072 	ldrh.w	r3, [r7, #114]	@ 0x72
  8000c94:	b2db      	uxtb	r3, r3
  8000c96:	2b2a      	cmp	r3, #42	@ 0x2a
  8000c98:	f040 80c0 	bne.w	8000e1c <Task_Auth+0x488>
-                        LCD_Clear();
+                        LCD_Clear();  // Xóa màn hình
  8000c9c:	f7ff fc52 	bl	8000544 <LCD_Clear>
-                        LCD_Print(2, 0, "SMART LOCK");
+                        LCD_Print(2, 0, "SMART LOCK");  // In dòng "SMART LOCK"
  8000ca0:	4a08      	ldr	r2, [pc, #32]	@ (8000cc4 <Task_Auth+0x330>)
  8000ca2:	2100      	movs	r1, #0
  8000ca4:	2002      	movs	r0, #2
  8000ca6:	f7ff fc27 	bl	80004f8 <LCD_Print>
-                        LCD_Print(3, 1, "SAN SANG...");
+                        LCD_Print(3, 1, "SAN SANG...");  // In dòng "SAN SANG..."
  8000caa:	4a07      	ldr	r2, [pc, #28]	@ (8000cc8 <Task_Auth+0x334>)
  8000cac:	2101      	movs	r1, #1
  8000cae:	2003      	movs	r0, #3
  8000cb0:	f7ff fc22 	bl	80004f8 <LCD_Print>
-                        systemMode = 0;
+                        systemMode = 0;  // Reset systemMode
  8000cb4:	2300      	movs	r3, #0
- 8000cb6:	f887 306f 	strb.w	r3, [r7, #111]	@ 0x6f
+ 8000cb6:	f887 307f 	strb.w	r3, [r7, #127]	@ 0x7f
  8000cba:	e0af      	b.n	8000e1c <Task_Auth+0x488>
  8000cbc:	2000012c 	.word	0x2000012c
  8000cc0:	200000d8 	.word	0x200000d8
@@ -1753,129 +1752,129 @@ void Task_Auth(void *argument) {
                 }
             }
             // CHẾ ĐỘ BÀN PHÍM
-            else if (systemMode == 2) {
- 8000d10:	f897 306f 	ldrb.w	r3, [r7, #111]	@ 0x6f
+            else if (systemMode == 2) {  // Nếu systemMode là 2
+ 8000d10:	f897 307f 	ldrb.w	r3, [r7, #127]	@ 0x7f
  8000d14:	2b02      	cmp	r3, #2
  8000d16:	f040 8081 	bne.w	8000e1c <Task_Auth+0x488>
-                if (rxData.dataSource == SRC_KEYPAD) {
- 8000d1a:	f897 3060 	ldrb.w	r3, [r7, #96]	@ 0x60
+                if (rxData.dataSource == SRC_KEYPAD) {  // Nếu dữ liệu từ bàn phím
+ 8000d1a:	f897 3070 	ldrb.w	r3, [r7, #112]	@ 0x70
  8000d1e:	2b00      	cmp	r3, #0
  8000d20:	d17c      	bne.n	8000e1c <Task_Auth+0x488>
-                    char key = (char)rxData.value;
- 8000d22:	f8b7 3062 	ldrh.w	r3, [r7, #98]	@ 0x62
- 8000d26:	f887 306d 	strb.w	r3, [r7, #109]	@ 0x6d
-                    if (key == '*') {
- 8000d2a:	f897 306d 	ldrb.w	r3, [r7, #109]	@ 0x6d
+                    char key = (char)rxData.value;  // Lấy ký tự từ data
+ 8000d22:	f8b7 3072 	ldrh.w	r3, [r7, #114]	@ 0x72
+ 8000d26:	f887 307d 	strb.w	r3, [r7, #125]	@ 0x7d
+                    if (key == '*') {  // Nếu là '*'
+ 8000d2a:	f897 307d 	ldrb.w	r3, [r7, #125]	@ 0x7d
  8000d2e:	2b2a      	cmp	r3, #42	@ 0x2a
  8000d30:	d116      	bne.n	8000d60 <Task_Auth+0x3cc>
-                        systemMode = 0;
+                        systemMode = 0;  // Reset systemMode
  8000d32:	2300      	movs	r3, #0
- 8000d34:	f887 306f 	strb.w	r3, [r7, #111]	@ 0x6f
-                        pin_index = 0;
+ 8000d34:	f887 307f 	strb.w	r3, [r7, #127]	@ 0x7f
+                        pin_index = 0;  // Reset pin_index
  8000d38:	4b53      	ldr	r3, [pc, #332]	@ (8000e88 <Task_Auth+0x4f4>)
  8000d3a:	2200      	movs	r2, #0
  8000d3c:	701a      	strb	r2, [r3, #0]
-                        LCD_Clear();
+                        LCD_Clear();  // Xóa màn hình
  8000d3e:	f7ff fc01 	bl	8000544 <LCD_Clear>
-                        LCD_Print(2, 0, "SMART LOCK");
+                        LCD_Print(2, 0, "SMART LOCK");  // In dòng "SMART LOCK"
  8000d42:	4a52      	ldr	r2, [pc, #328]	@ (8000e8c <Task_Auth+0x4f8>)
  8000d44:	2100      	movs	r1, #0
  8000d46:	2002      	movs	r0, #2
  8000d48:	f7ff fbd6 	bl	80004f8 <LCD_Print>
-                        LCD_Print(3, 1, "SAN SANG...");
+                        LCD_Print(3, 1, "SAN SANG...");  // In dòng "SAN SANG..."
  8000d4c:	4a50      	ldr	r2, [pc, #320]	@ (8000e90 <Task_Auth+0x4fc>)
  8000d4e:	2101      	movs	r1, #1
  8000d50:	2003      	movs	r0, #3
  8000d52:	f7ff fbd1 	bl	80004f8 <LCD_Print>
-                        osDelay(300);
+                        osDelay(300);  // Chờ 300ms
  8000d56:	f44f 7096 	mov.w	r0, #300	@ 0x12c
  8000d5a:	f004 fe73 	bl	8005a44 <osDelay>
  8000d5e:	e05d      	b.n	8000e1c <Task_Auth+0x488>
                     }
-                    else if (key == 'D') {
- 8000d60:	f897 306d 	ldrb.w	r3, [r7, #109]	@ 0x6d
+                    else if (key == 'D') {  // Nếu là 'D'
+ 8000d60:	f897 307d 	ldrb.w	r3, [r7, #125]	@ 0x7d
  8000d64:	2b44      	cmp	r3, #68	@ 0x44
  8000d66:	d134      	bne.n	8000dd2 <Task_Auth+0x43e>
-                        entered_PIN[pin_index] = '\0';
+                        entered_PIN[pin_index] = '\0';  // Kết thúc chuỗi
  8000d68:	4b47      	ldr	r3, [pc, #284]	@ (8000e88 <Task_Auth+0x4f4>)
  8000d6a:	781b      	ldrb	r3, [r3, #0]
  8000d6c:	461a      	mov	r2, r3
  8000d6e:	4b49      	ldr	r3, [pc, #292]	@ (8000e94 <Task_Auth+0x500>)
  8000d70:	2100      	movs	r1, #0
  8000d72:	5499      	strb	r1, [r3, r2]
-                        if (strcmp(entered_PIN, correct_PIN) == 0) {
+                        if (strcmp(entered_PIN, correct_PIN) == 0) {  // Nếu mã PIN đúng
  8000d74:	4948      	ldr	r1, [pc, #288]	@ (8000e98 <Task_Auth+0x504>)
  8000d76:	4847      	ldr	r0, [pc, #284]	@ (8000e94 <Task_Auth+0x500>)
  8000d78:	f7ff f9ea 	bl	8000150 <strcmp>
  8000d7c:	4603      	mov	r3, r0
  8000d7e:	2b00      	cmp	r3, #0
  8000d80:	d109      	bne.n	8000d96 <Task_Auth+0x402>
-                            unlock = true;
+                            unlock = true;  // Mở khóa
  8000d82:	2301      	movs	r3, #1
- 8000d84:	f887 306e 	strb.w	r3, [r7, #110]	@ 0x6e
-                            sprintf(msg_success, "DOOR_OPENED:PIN\n");
- 8000d88:	f107 0328 	add.w	r3, r7, #40	@ 0x28
+ 8000d84:	f887 307e 	strb.w	r3, [r7, #126]	@ 0x7e
+                            sprintf(msg_success, "DOOR_OPENED:PIN\n");  // Gửi thông báo
+ 8000d88:	f107 0348 	add.w	r3, r7, #72	@ 0x48
  8000d8c:	4943      	ldr	r1, [pc, #268]	@ (8000e9c <Task_Auth+0x508>)
  8000d8e:	4618      	mov	r0, r3
  8000d90:	f008 fd7a 	bl	8009888 <siprintf>
  8000d94:	e019      	b.n	8000dca <Task_Auth+0x436>
-                        } else {
-                        	error_count++;
+                        } else {  // Nếu mã PIN sai
+                        	error_count++;  // Tăng số lần thất bại
  8000d96:	4b42      	ldr	r3, [pc, #264]	@ (8000ea0 <Task_Auth+0x50c>)
  8000d98:	781b      	ldrb	r3, [r3, #0]
  8000d9a:	3301      	adds	r3, #1
  8000d9c:	b2da      	uxtb	r2, r3
  8000d9e:	4b40      	ldr	r3, [pc, #256]	@ (8000ea0 <Task_Auth+0x50c>)
  8000da0:	701a      	strb	r2, [r3, #0]
-                        	Buzzer_Fail();
+                        	Buzzer_Fail();  // Báo động
  8000da2:	f7ff fd61 	bl	8000868 <Buzzer_Fail>
-                            LCD_Clear();
+                            LCD_Clear();  // Xóa màn hình
  8000da6:	f7ff fbcd 	bl	8000544 <LCD_Clear>
-                            LCD_Print(2, 0, "SAI MA PIN!");
+                            LCD_Print(2, 0, "SAI MA PIN!");  // In dòng "SAI MA PIN!"
  8000daa:	4a3e      	ldr	r2, [pc, #248]	@ (8000ea4 <Task_Auth+0x510>)
  8000dac:	2100      	movs	r1, #0
  8000dae:	2002      	movs	r0, #2
  8000db0:	f7ff fba2 	bl	80004f8 <LCD_Print>
-                            osDelay(2000);
+                            osDelay(2000);  // Chờ 2000ms
  8000db4:	f44f 60fa 	mov.w	r0, #2000	@ 0x7d0
  8000db8:	f004 fe44 	bl	8005a44 <osDelay>
-                            LCD_Clear();
+                            LCD_Clear();  // Xóa màn hình
  8000dbc:	f7ff fbc2 	bl	8000544 <LCD_Clear>
-                            LCD_Print(0, 0, "NHAP LAI:");
+                            LCD_Print(0, 0, "NHAP LAI:");  // In dòng "NHAP LAI:"
  8000dc0:	4a39      	ldr	r2, [pc, #228]	@ (8000ea8 <Task_Auth+0x514>)
  8000dc2:	2100      	movs	r1, #0
  8000dc4:	2000      	movs	r0, #0
  8000dc6:	f7ff fb97 	bl	80004f8 <LCD_Print>
                         }
-                        pin_index = 0;
+                        pin_index = 0;  // Reset pin_index
  8000dca:	4b2f      	ldr	r3, [pc, #188]	@ (8000e88 <Task_Auth+0x4f4>)
  8000dcc:	2200      	movs	r2, #0
  8000dce:	701a      	strb	r2, [r3, #0]
  8000dd0:	e024      	b.n	8000e1c <Task_Auth+0x488>
                     }
-                    else if (key == 'C') {
- 8000dd2:	f897 306d 	ldrb.w	r3, [r7, #109]	@ 0x6d
+                    else if (key == 'C') {  // Nếu là 'C'
+ 8000dd2:	f897 307d 	ldrb.w	r3, [r7, #125]	@ 0x7d
  8000dd6:	2b43      	cmp	r3, #67	@ 0x43
  8000dd8:	d10a      	bne.n	8000df0 <Task_Auth+0x45c>
-                        pin_index = 0;
+                        pin_index = 0;  // Reset pin_index
  8000dda:	4b2b      	ldr	r3, [pc, #172]	@ (8000e88 <Task_Auth+0x4f4>)
  8000ddc:	2200      	movs	r2, #0
  8000dde:	701a      	strb	r2, [r3, #0]
-                        LCD_Clear();
+                        LCD_Clear();  // Xóa màn hình
  8000de0:	f7ff fbb0 	bl	8000544 <LCD_Clear>
-                        LCD_Print(0, 0, "NHAP LAI:");
+                        LCD_Print(0, 0, "NHAP LAI:");  // In dòng "NHAP LAI:"
  8000de4:	4a30      	ldr	r2, [pc, #192]	@ (8000ea8 <Task_Auth+0x514>)
  8000de6:	2100      	movs	r1, #0
  8000de8:	2000      	movs	r0, #0
  8000dea:	f7ff fb85 	bl	80004f8 <LCD_Print>
  8000dee:	e015      	b.n	8000e1c <Task_Auth+0x488>
                     }
-                    else if (pin_index < 9) {
+                    else if (pin_index < 9) {  // Nếu pin_index nhỏ hơn 9
  8000df0:	4b25      	ldr	r3, [pc, #148]	@ (8000e88 <Task_Auth+0x4f4>)
  8000df2:	781b      	ldrb	r3, [r3, #0]
  8000df4:	2b08      	cmp	r3, #8
  8000df6:	d811      	bhi.n	8000e1c <Task_Auth+0x488>
-                        entered_PIN[pin_index++] = key;
+                        entered_PIN[pin_index++] = key;  // Thêm ký tự vào mã PIN
  8000df8:	4b23      	ldr	r3, [pc, #140]	@ (8000e88 <Task_Auth+0x4f4>)
  8000dfa:	781b      	ldrb	r3, [r3, #0]
  8000dfc:	1c5a      	adds	r2, r3, #1
@@ -1884,9 +1883,9 @@ void Task_Auth(void *argument) {
  8000e02:	7011      	strb	r1, [r2, #0]
  8000e04:	4619      	mov	r1, r3
  8000e06:	4a23      	ldr	r2, [pc, #140]	@ (8000e94 <Task_Auth+0x500>)
- 8000e08:	f897 306d 	ldrb.w	r3, [r7, #109]	@ 0x6d
+ 8000e08:	f897 307d 	ldrb.w	r3, [r7, #125]	@ 0x7d
  8000e0c:	5453      	strb	r3, [r2, r1]
-                        LCD_Print(pin_index, 1, "*");
+                        LCD_Print(pin_index, 1, "*");  // In ký tự '*' vào màn hình
  8000e0e:	4b1e      	ldr	r3, [pc, #120]	@ (8000e88 <Task_Auth+0x4f4>)
  8000e10:	781b      	ldrb	r3, [r3, #0]
  8000e12:	4a26      	ldr	r2, [pc, #152]	@ (8000eac <Task_Auth+0x518>)
@@ -1898,60 +1897,60 @@ void Task_Auth(void *argument) {
             }
 
             // MỞ KHÓA THỰC TẾ
-            if (unlock) {
- 8000e1c:	f897 306e 	ldrb.w	r3, [r7, #110]	@ 0x6e
+            if (unlock) {   
+ 8000e1c:	f897 307e 	ldrb.w	r3, [r7, #126]	@ 0x7e
  8000e20:	2b00      	cmp	r3, #0
  8000e22:	f43f add9 	beq.w	80009d8 <Task_Auth+0x44>
-            	error_count = 0;
+            	error_count = 0;  // Reset số lần thất bại
  8000e26:	4b1e      	ldr	r3, [pc, #120]	@ (8000ea0 <Task_Auth+0x50c>)
  8000e28:	2200      	movs	r2, #0
  8000e2a:	701a      	strb	r2, [r3, #0]
-                LCD_Clear();
+                LCD_Clear();  // Xóa màn hình
  8000e2c:	f7ff fb8a 	bl	8000544 <LCD_Clear>
-                LCD_Print(4, 0, "MO CUA");
+                LCD_Print(4, 0, "MO CUA");  // In dòng "MO CUA"
  8000e30:	4a1f      	ldr	r2, [pc, #124]	@ (8000eb0 <Task_Auth+0x51c>)
  8000e32:	2100      	movs	r1, #0
  8000e34:	2004      	movs	r0, #4
  8000e36:	f7ff fb5f 	bl	80004f8 <LCD_Print>
-                Lock_Open();
+                Lock_Open();  // Mở khóa
  8000e3a:	f000 fd65 	bl	8001908 <Lock_Open>
 
                 // Báo cáo lên App nếu chuỗi phản hồi không rỗng
-                if (strlen(msg_success) > 0) {
- 8000e3e:	f107 0328 	add.w	r3, r7, #40	@ 0x28
+                if (strlen(msg_success) > 0) {  // Nếu chuỗi msg_success không rỗng
+ 8000e3e:	f107 0348 	add.w	r3, r7, #72	@ 0x48
  8000e42:	781b      	ldrb	r3, [r3, #0]
  8000e44:	2b00      	cmp	r3, #0
  8000e46:	d00c      	beq.n	8000e62 <Task_Auth+0x4ce>
-                    HAL_UART_Transmit(&huart2, (uint8_t*)msg_success, strlen(msg_success), 100);
- 8000e48:	f107 0328 	add.w	r3, r7, #40	@ 0x28
+                    HAL_UART_Transmit(&huart2, (uint8_t*)msg_success, strlen(msg_success), 100);  // Gửi dữ liệu lên App
+ 8000e48:	f107 0348 	add.w	r3, r7, #72	@ 0x48
  8000e4c:	4618      	mov	r0, r3
  8000e4e:	f7ff f989 	bl	8000164 <strlen>
  8000e52:	4603      	mov	r3, r0
  8000e54:	b29a      	uxth	r2, r3
- 8000e56:	f107 0128 	add.w	r1, r7, #40	@ 0x28
+ 8000e56:	f107 0148 	add.w	r1, r7, #72	@ 0x48
  8000e5a:	2364      	movs	r3, #100	@ 0x64
  8000e5c:	4815      	ldr	r0, [pc, #84]	@ (8000eb4 <Task_Auth+0x520>)
  8000e5e:	f003 fdff 	bl	8004a60 <HAL_UART_Transmit>
                 }
 
-                osTimerStop(autoLockTimerHandle);
+                osTimerStop(autoLockTimerHandle);  // Dừng timer tự động khóa
  8000e62:	4b15      	ldr	r3, [pc, #84]	@ (8000eb8 <Task_Auth+0x524>)
  8000e64:	681b      	ldr	r3, [r3, #0]
  8000e66:	4618      	mov	r0, r3
  8000e68:	f004 fec6 	bl	8005bf8 <osTimerStop>
-                osTimerStart(autoLockTimerHandle, 3000);
+                osTimerStart(autoLockTimerHandle, 3000);  // Bắt đầu timer tự động khóa
  8000e6c:	4b12      	ldr	r3, [pc, #72]	@ (8000eb8 <Task_Auth+0x524>)
  8000e6e:	681b      	ldr	r3, [r3, #0]
  8000e70:	f640 31b8 	movw	r1, #3000	@ 0xbb8
  8000e74:	4618      	mov	r0, r3
  8000e76:	f004 fe91 	bl	8005b9c <osTimerStart>
-                systemMode = 0;
+                systemMode = 0;  // Reset systemMode
  8000e7a:	2300      	movs	r3, #0
- 8000e7c:	f887 306f 	strb.w	r3, [r7, #111]	@ 0x6f
+ 8000e7c:	f887 307f 	strb.w	r3, [r7, #127]	@ 0x7f
  8000e80:	e5aa      	b.n	80009d8 <Task_Auth+0x44>
-                continue;
+                continue;                                       // Tiếp tục vòng lặp
  8000e82:	bf00      	nop
-        if (osMessageQueueGet(inputQueueHandle, &rxData, NULL, osWaitForever) == osOK) {
+        if (osMessageQueueGet(inputQueueHandle, &rxData, NULL, osWaitForever) == osOK) { // Nếu nhận được dữ liệu
  8000e84:	e5a8      	b.n	80009d8 <Task_Auth+0x44>
  8000e86:	bf00      	nop
  8000e88:	200000fe 	.word	0x200000fe
@@ -1974,19 +1973,19 @@ void Task_Auth(void *argument) {
     }
 }
 
-void AutoLock_Callback(void *argument) {
+void AutoLock_Callback(void *argument) {    // Hàm callback cho timer tự động khóa
  8000ebc:	b580      	push	{r7, lr}
  8000ebe:	b084      	sub	sp, #16
  8000ec0:	af00      	add	r7, sp, #0
  8000ec2:	6078      	str	r0, [r7, #4]
-    InputData_t ev;
-    ev.dataSource = SRC_SYSTEM;
+    InputData_t ev;     // Tạo một biến InputData_t
+    ev.dataSource = SRC_SYSTEM;  // Set data source là SRC_SYSTEM
  8000ec4:	2363      	movs	r3, #99	@ 0x63
  8000ec6:	733b      	strb	r3, [r7, #12]
-    ev.value = EVT_AUTOLOCK;
+    ev.value = EVT_AUTOLOCK;  // Set value là EVT_AUTOLOCK
  8000ec8:	2301      	movs	r3, #1
  8000eca:	81fb      	strh	r3, [r7, #14]
-    osMessageQueuePut(inputQueueHandle, &ev, 0, 0);
+    osMessageQueuePut(inputQueueHandle, &ev, 0, 0);  // Gửi dữ liệu vào input queue
  8000ecc:	4b05      	ldr	r3, [pc, #20]	@ (8000ee4 <AutoLock_Callback+0x28>)
  8000ece:	6818      	ldr	r0, [r3, #0]
  8000ed0:	f107 010c 	add.w	r1, r7, #12
@@ -2002,15 +2001,15 @@ void AutoLock_Callback(void *argument) {
 
 08000ee8 <Task_Buzzer>:
 
-// --- TASK 3: LUỒNG RIÊNG CHO CÒI BUZZER ---
-void Task_Buzzer(void *argument) {
+// TASK 3: LUỒNG RIÊNG CHO CÒI BUZZER
+void Task_Buzzer(void *argument) {  // Hàm callback cho timer tự động khóa      
  8000ee8:	b580      	push	{r7, lr}
  8000eea:	b082      	sub	sp, #8
  8000eec:	af00      	add	r7, sp, #0
  8000eee:	6078      	str	r0, [r7, #4]
-    for(;;) {
-        // Task sẽ đứng đợi ở đây mãi mãi (osWaitForever) cho đến khi có ai "nhả" Semaphore
-        if (osSemaphoreAcquire(buzzerSemaphoreHandle, osWaitForever) == osOK) {
+    for(;;) {  // Vòng lặp vô hạn
+        // Task sẽ đứng đợi ở đây mãi mãi (osWaitForever) cho đến khi có ai "nhả"  Semaphore
+        if (osSemaphoreAcquire(buzzerSemaphoreHandle, osWaitForever) == osOK) {  // Kiểm tra semaphore
  8000ef0:	4b16      	ldr	r3, [pc, #88]	@ (8000f4c <Task_Buzzer+0x64>)
  8000ef2:	681b      	ldr	r3, [r3, #0]
  8000ef4:	f04f 31ff 	mov.w	r1, #4294967295
@@ -2019,7 +2018,7 @@ void Task_Buzzer(void *argument) {
  8000efe:	4603      	mov	r3, r0
  8000f00:	2b00      	cmp	r3, #0
  8000f02:	d1f5      	bne.n	8000ef0 <Task_Buzzer+0x8>
-            if (error_count >= 3) {
+            if (error_count >= 3) {  // Nếu số lần thất bại lớn hơn hoặc bằng 3
  8000f04:	4b12      	ldr	r3, [pc, #72]	@ (8000f50 <Task_Buzzer+0x68>)
  8000f06:	781b      	ldrb	r3, [r3, #0]
  8000f08:	2b02      	cmp	r3, #2
@@ -2060,7 +2059,7 @@ void Task_Buzzer(void *argument) {
  8000f42:	2120      	movs	r1, #32
  8000f44:	4803      	ldr	r0, [pc, #12]	@ (8000f54 <Task_Buzzer+0x6c>)
  8000f46:	f001 fcec 	bl	8002922 <HAL_GPIO_WritePin>
-        if (osSemaphoreAcquire(buzzerSemaphoreHandle, osWaitForever) == osOK) {
+        if (osSemaphoreAcquire(buzzerSemaphoreHandle, osWaitForever) == osOK) {  // Kiểm tra semaphore
  8000f4a:	e7d1      	b.n	8000ef0 <Task_Buzzer+0x8>
  8000f4c:	200000d4 	.word	0x200000d4
  8000f50:	200000e4 	.word	0x200000e4
@@ -2070,17 +2069,17 @@ void Task_Buzzer(void *argument) {
 extern CLCD_I2C_Name LCD1;
 extern UART_HandleTypeDef huart1;
 
-const uint8_t AS608_Header[6] = {0xEF, 0x01, 0xFF, 0xFF, 0xFF, 0xFF};
+const uint8_t AS608_Header[6] = {0xEF, 0x01, 0xFF, 0xFF, 0xFF, 0xFF};       // Header
 
-static void AS608_SendCommand(uint8_t *cmd, uint8_t len) {
+static void AS608_SendCommand(uint8_t *cmd, uint8_t len) {  // Hàm gửi lệnh đến AS608
  8000f58:	b580      	push	{r7, lr}
  8000f5a:	b084      	sub	sp, #16
  8000f5c:	af00      	add	r7, sp, #0
  8000f5e:	6078      	str	r0, [r7, #4]
  8000f60:	460b      	mov	r3, r1
  8000f62:	70fb      	strb	r3, [r7, #3]
-	uint8_t dummy;
-	while (HAL_UART_Receive(&huart1, &dummy, 1, 2) == HAL_OK) {}
+	uint8_t dummy;    // Khai báo biến dummy
+	while (HAL_UART_Receive(&huart1, &dummy, 1, 2) == HAL_OK) {}  // Đọc dữ liệu từ UART1 để xóa buffer rác
  8000f64:	bf00      	nop
  8000f66:	f107 010f 	add.w	r1, r7, #15
  8000f6a:	2302      	movs	r3, #2
@@ -2090,13 +2089,13 @@ static void AS608_SendCommand(uint8_t *cmd, uint8_t len) {
  8000f74:	4603      	mov	r3, r0
  8000f76:	2b00      	cmp	r3, #0
  8000f78:	d0f5      	beq.n	8000f66 <AS608_SendCommand+0xe>
-    HAL_UART_Transmit(&huart1, (uint8_t*)AS608_Header, 6, 100);
+    HAL_UART_Transmit(&huart1, (uint8_t*)AS608_Header, 6, 100);  // Gửi header
  8000f7a:	2364      	movs	r3, #100	@ 0x64
  8000f7c:	2206      	movs	r2, #6
  8000f7e:	4908      	ldr	r1, [pc, #32]	@ (8000fa0 <AS608_SendCommand+0x48>)
  8000f80:	4806      	ldr	r0, [pc, #24]	@ (8000f9c <AS608_SendCommand+0x44>)
  8000f82:	f003 fd6d 	bl	8004a60 <HAL_UART_Transmit>
-    HAL_UART_Transmit(&huart1, cmd, len, 100);
+    HAL_UART_Transmit(&huart1, cmd, len, 100);  // Gửi lệnh
  8000f86:	78fb      	ldrb	r3, [r7, #3]
  8000f88:	b29a      	uxth	r2, r3
  8000f8a:	2364      	movs	r3, #100	@ 0x64
@@ -2113,21 +2112,21 @@ static void AS608_SendCommand(uint8_t *cmd, uint8_t len) {
 
 08000fa4 <AS608_ReceiveResponse>:
 
-static uint8_t AS608_ReceiveResponse(uint8_t *buffer, uint8_t len) {
+static uint8_t AS608_ReceiveResponse(uint8_t *buffer, uint8_t len) {  // Hàm nhận phản hồi từ AS608
  8000fa4:	b580      	push	{r7, lr}
  8000fa6:	b084      	sub	sp, #16
  8000fa8:	af00      	add	r7, sp, #0
  8000faa:	6078      	str	r0, [r7, #4]
  8000fac:	460b      	mov	r3, r1
  8000fae:	70fb      	strb	r3, [r7, #3]
-	if (__HAL_UART_GET_FLAG(&huart1, UART_FLAG_ORE) != RESET) {
+	if (__HAL_UART_GET_FLAG(&huart1, UART_FLAG_ORE) != RESET) {  // Kiểm tra lỗi
  8000fb0:	4b12      	ldr	r3, [pc, #72]	@ (8000ffc <AS608_ReceiveResponse+0x58>)
  8000fb2:	681b      	ldr	r3, [r3, #0]
  8000fb4:	681b      	ldr	r3, [r3, #0]
  8000fb6:	f003 0308 	and.w	r3, r3, #8
  8000fba:	2b08      	cmp	r3, #8
  8000fbc:	d10a      	bne.n	8000fd4 <AS608_ReceiveResponse+0x30>
-        __HAL_UART_CLEAR_OREFLAG(&huart1);
+        __HAL_UART_CLEAR_OREFLAG(&huart1);  // Xóa lỗi
  8000fbe:	2300      	movs	r3, #0
  8000fc0:	60fb      	str	r3, [r7, #12]
  8000fc2:	4b0e      	ldr	r3, [pc, #56]	@ (8000ffc <AS608_ReceiveResponse+0x58>)
@@ -2140,7 +2139,7 @@ static uint8_t AS608_ReceiveResponse(uint8_t *buffer, uint8_t len) {
  8000fd0:	60fb      	str	r3, [r7, #12]
  8000fd2:	68fb      	ldr	r3, [r7, #12]
     }
-    if (HAL_UART_Receive(&huart1, buffer, len, 500) == HAL_OK) {
+    if (HAL_UART_Receive(&huart1, buffer, len, 500) == HAL_OK) {  // Nhận dữ liệu từ UART1
  8000fd4:	78fb      	ldrb	r3, [r7, #3]
  8000fd6:	b29a      	uxth	r2, r3
  8000fd8:	f44f 73fa 	mov.w	r3, #500	@ 0x1f4
@@ -2155,7 +2154,7 @@ static uint8_t AS608_ReceiveResponse(uint8_t *buffer, uint8_t len) {
  8000fec:	7a5b      	ldrb	r3, [r3, #9]
  8000fee:	e000      	b.n	8000ff2 <AS608_ReceiveResponse+0x4e>
     }
-    return 0xFF;
+    return 0xFF;  // Trả về lỗi
  8000ff0:	23ff      	movs	r3, #255	@ 0xff
 }
  8000ff2:	4618      	mov	r0, r3
@@ -2167,24 +2166,24 @@ static uint8_t AS608_ReceiveResponse(uint8_t *buffer, uint8_t len) {
 
 08001000 <AS608_GetImage>:
 
-uint8_t AS608_GetImage(void) {
+uint8_t AS608_GetImage(void) {     // Hàm lấy hình ảnh từ AS608         
  8001000:	b580      	push	{r7, lr}
  8001002:	b086      	sub	sp, #24
  8001004:	af00      	add	r7, sp, #0
-    uint8_t cmd[] = {0x01, 0x00, 0x03, 0x01, 0x00, 0x05};
+    uint8_t cmd[] = {0x01, 0x00, 0x03, 0x01, 0x00, 0x05};    // Lệnh lấy hình ảnh
  8001006:	4a0c      	ldr	r2, [pc, #48]	@ (8001038 <AS608_GetImage+0x38>)
  8001008:	f107 0310 	add.w	r3, r7, #16
  800100c:	e892 0003 	ldmia.w	r2, {r0, r1}
  8001010:	6018      	str	r0, [r3, #0]
  8001012:	3304      	adds	r3, #4
  8001014:	8019      	strh	r1, [r3, #0]
-    uint8_t rxBuffer[12];
-    AS608_SendCommand(cmd, sizeof(cmd));
+    uint8_t rxBuffer[12];   // Buffer chứa phản hồi
+    AS608_SendCommand(cmd, sizeof(cmd));  // Gửi lệnh
  8001016:	f107 0310 	add.w	r3, r7, #16
  800101a:	2106      	movs	r1, #6
  800101c:	4618      	mov	r0, r3
  800101e:	f7ff ff9b 	bl	8000f58 <AS608_SendCommand>
-    return AS608_ReceiveResponse(rxBuffer, 12);
+    return AS608_ReceiveResponse(rxBuffer, 12);  // Nhận phản hồi
  8001022:	1d3b      	adds	r3, r7, #4
  8001024:	210c      	movs	r1, #12
  8001026:	4618      	mov	r0, r3
@@ -2200,13 +2199,13 @@ uint8_t AS608_GetImage(void) {
 
 0800103c <AS608_GenChar>:
 
-uint8_t AS608_GenChar(uint8_t bufferID) {
+uint8_t AS608_GenChar(uint8_t bufferID) {  // Hàm tạo đặc trưng vân tay 
  800103c:	b580      	push	{r7, lr}
  800103e:	b088      	sub	sp, #32
  8001040:	af00      	add	r7, sp, #0
  8001042:	4603      	mov	r3, r0
  8001044:	71fb      	strb	r3, [r7, #7]
-    uint8_t cmd[] = {0x01, 0x00, 0x04, 0x02, bufferID, 0x00, (uint8_t)(0x07 + bufferID)};
+    uint8_t cmd[] = {0x01, 0x00, 0x04, 0x02, bufferID, 0x00, (uint8_t)(0x07 + bufferID)};  // Lệnh tạo đặc trưng
  8001046:	2301      	movs	r3, #1
  8001048:	763b      	strb	r3, [r7, #24]
  800104a:	2300      	movs	r3, #0
@@ -2223,13 +2222,13 @@ uint8_t AS608_GenChar(uint8_t bufferID) {
  8001060:	3307      	adds	r3, #7
  8001062:	b2db      	uxtb	r3, r3
  8001064:	77bb      	strb	r3, [r7, #30]
-    uint8_t rxBuffer[12];
-    AS608_SendCommand(cmd, sizeof(cmd));
+    uint8_t rxBuffer[12];  // Buffer chứa phản hồi
+    AS608_SendCommand(cmd, sizeof(cmd));  // Gửi lệnh
  8001066:	f107 0318 	add.w	r3, r7, #24
  800106a:	2107      	movs	r1, #7
  800106c:	4618      	mov	r0, r3
  800106e:	f7ff ff73 	bl	8000f58 <AS608_SendCommand>
-    return AS608_ReceiveResponse(rxBuffer, 12);
+    return AS608_ReceiveResponse(rxBuffer, 12);  // Nhận phản hồi
  8001072:	f107 030c 	add.w	r3, r7, #12
  8001076:	210c      	movs	r1, #12
  8001078:	4618      	mov	r0, r3
@@ -2243,13 +2242,13 @@ uint8_t AS608_GenChar(uint8_t bufferID) {
 
 08001088 <AS608_Search>:
 
-uint8_t AS608_Search(uint16_t *fingerID, uint16_t *matchScore) {
+uint8_t AS608_Search(uint16_t *fingerID, uint16_t *matchScore) {  // Hàm tìm kiếm vân tay
  8001088:	b580      	push	{r7, lr}
  800108a:	b08a      	sub	sp, #40	@ 0x28
  800108c:	af00      	add	r7, sp, #0
  800108e:	6078      	str	r0, [r7, #4]
  8001090:	6039      	str	r1, [r7, #0]
-    uint8_t cmd[] = {0x01, 0x00, 0x08, 0x04, 0x01, 0x00, 0x00, 0x00, 0xC8, 0x00, 0xD6};
+    uint8_t cmd[] = {0x01, 0x00, 0x08, 0x04, 0x01, 0x00, 0x00, 0x00, 0xC8, 0x00, 0xD6};  // Lệnh tìm kiếm
  8001092:	4a1e      	ldr	r2, [pc, #120]	@ (800110c <AS608_Search+0x84>)
  8001094:	f107 031c 	add.w	r3, r7, #28
  8001098:	ca07      	ldmia	r2, {r0, r1, r2}
@@ -2258,13 +2257,13 @@ uint8_t AS608_Search(uint16_t *fingerID, uint16_t *matchScore) {
  800109e:	3302      	adds	r3, #2
  80010a0:	0c12      	lsrs	r2, r2, #16
  80010a2:	701a      	strb	r2, [r3, #0]
-    uint8_t rxBuffer[16];
-    AS608_SendCommand(cmd, sizeof(cmd));
+    uint8_t rxBuffer[16];  // Buffer chứa phản hồi
+    AS608_SendCommand(cmd, sizeof(cmd));  // Gửi lệnh
  80010a4:	f107 031c 	add.w	r3, r7, #28
  80010a8:	210b      	movs	r1, #11
  80010aa:	4618      	mov	r0, r3
  80010ac:	f7ff ff54 	bl	8000f58 <AS608_SendCommand>
-    if (HAL_UART_Receive(&huart1, rxBuffer, 16, 500) == HAL_OK) {
+    if (HAL_UART_Receive(&huart1, rxBuffer, 16, 500) == HAL_OK) {  // Nhận phản hồi
  80010b0:	f107 010c 	add.w	r1, r7, #12
  80010b4:	f44f 73fa 	mov.w	r3, #500	@ 0x1f4
  80010b8:	2210      	movs	r2, #16
@@ -2273,11 +2272,11 @@ uint8_t AS608_Search(uint16_t *fingerID, uint16_t *matchScore) {
  80010c0:	4603      	mov	r3, r0
  80010c2:	2b00      	cmp	r3, #0
  80010c4:	d11c      	bne.n	8001100 <AS608_Search+0x78>
-        if (rxBuffer[9] == AS608_OK) {
+        if (rxBuffer[9] == AS608_OK) {  // Kiểm tra phản hồi
  80010c6:	7d7b      	ldrb	r3, [r7, #21]
  80010c8:	2b00      	cmp	r3, #0
  80010ca:	d117      	bne.n	80010fc <AS608_Search+0x74>
-            *fingerID = (rxBuffer[10] << 8) | rxBuffer[11];
+            *fingerID = (rxBuffer[10] << 8) | rxBuffer[11];  // Lấy ID vân tay
  80010cc:	7dbb      	ldrb	r3, [r7, #22]
  80010ce:	b21b      	sxth	r3, r3
  80010d0:	021b      	lsls	r3, r3, #8
@@ -2289,7 +2288,7 @@ uint8_t AS608_Search(uint16_t *fingerID, uint16_t *matchScore) {
  80010dc:	b29a      	uxth	r2, r3
  80010de:	687b      	ldr	r3, [r7, #4]
  80010e0:	801a      	strh	r2, [r3, #0]
-            *matchScore = (rxBuffer[12] << 8) | rxBuffer[13];
+            *matchScore = (rxBuffer[12] << 8) | rxBuffer[13];  // Lấy điểm trùng khớp
  80010e2:	7e3b      	ldrb	r3, [r7, #24]
  80010e4:	b21b      	sxth	r3, r3
  80010e6:	021b      	lsls	r3, r3, #8
@@ -2301,15 +2300,15 @@ uint8_t AS608_Search(uint16_t *fingerID, uint16_t *matchScore) {
  80010f2:	b29a      	uxth	r2, r3
  80010f4:	683b      	ldr	r3, [r7, #0]
  80010f6:	801a      	strh	r2, [r3, #0]
-            return AS608_OK;
+            return AS608_OK;  // Trả về thành công
  80010f8:	2300      	movs	r3, #0
  80010fa:	e002      	b.n	8001102 <AS608_Search+0x7a>
         }
-        return rxBuffer[9];
+        return rxBuffer[9];  // Trả về lỗi
  80010fc:	7d7b      	ldrb	r3, [r7, #21]
  80010fe:	e000      	b.n	8001102 <AS608_Search+0x7a>
     }
-    return 0xFF;
+    return 0xFF;  // Trả về lỗi
  8001100:	23ff      	movs	r3, #255	@ 0xff
 }
  8001102:	4618      	mov	r0, r3
@@ -2322,7 +2321,7 @@ uint8_t AS608_Search(uint16_t *fingerID, uint16_t *matchScore) {
 
 08001114 <AS608_CheckFingerprint>:
 
-int AS608_CheckFingerprint(void) {
+int AS608_CheckFingerprint(void) {  // Hàm kiểm tra vân tay
  8001114:	b580      	push	{r7, lr}
  8001116:	b082      	sub	sp, #8
  8001118:	af00      	add	r7, sp, #0
@@ -2331,14 +2330,14 @@ int AS608_CheckFingerprint(void) {
  800111c:	80fb      	strh	r3, [r7, #6]
  800111e:	2300      	movs	r3, #0
  8001120:	80bb      	strh	r3, [r7, #4]
-    if (AS608_GetImage() != AS608_OK) return 0;
+    if (AS608_GetImage() != AS608_OK) return 0;  // Lấy hình ảnh
  8001122:	f7ff ff6d 	bl	8001000 <AS608_GetImage>
  8001126:	4603      	mov	r3, r0
  8001128:	2b00      	cmp	r3, #0
  800112a:	d001      	beq.n	8001130 <AS608_CheckFingerprint+0x1c>
  800112c:	2300      	movs	r3, #0
  800112e:	e015      	b.n	800115c <AS608_CheckFingerprint+0x48>
-    if (AS608_GenChar(1) != AS608_OK) return -1;
+    if (AS608_GenChar(1) != AS608_OK) return -1;  // Tạo đặc trưng
  8001130:	2001      	movs	r0, #1
  8001132:	f7ff ff83 	bl	800103c <AS608_GenChar>
  8001136:	4603      	mov	r3, r0
@@ -2346,7 +2345,7 @@ int AS608_CheckFingerprint(void) {
  800113a:	d002      	beq.n	8001142 <AS608_CheckFingerprint+0x2e>
  800113c:	f04f 33ff 	mov.w	r3, #4294967295
  8001140:	e00c      	b.n	800115c <AS608_CheckFingerprint+0x48>
-    if (AS608_Search(&fingerID, &score) == AS608_OK) return fingerID;
+    if (AS608_Search(&fingerID, &score) == AS608_OK) return fingerID;  // Tìm kiếm
  8001142:	1d3a      	adds	r2, r7, #4
  8001144:	1dbb      	adds	r3, r7, #6
  8001146:	4611      	mov	r1, r2
@@ -2357,7 +2356,7 @@ int AS608_CheckFingerprint(void) {
  8001152:	d101      	bne.n	8001158 <AS608_CheckFingerprint+0x44>
  8001154:	88fb      	ldrh	r3, [r7, #6]
  8001156:	e001      	b.n	800115c <AS608_CheckFingerprint+0x48>
-    return -1;
+    return -1;  // Trả về lỗi
  8001158:	f04f 33ff 	mov.w	r3, #4294967295
 }
  800115c:	4618      	mov	r0, r3
@@ -2367,31 +2366,31 @@ int AS608_CheckFingerprint(void) {
 
 08001164 <AS608_RegModel>:
 
-uint8_t AS608_RegModel(void) {
+uint8_t AS608_RegModel(void) {  // Hàm đăng ký vân tay
  8001164:	b580      	push	{r7, lr}
  8001166:	b086      	sub	sp, #24
  8001168:	af00      	add	r7, sp, #0
-    uint8_t cmd[] = {0x01, 0x00, 0x03, 0x05, 0x00, 0x09};
+    uint8_t cmd[] = {0x01, 0x00, 0x03, 0x05, 0x00, 0x09};  // Lệnh đăng ký
  800116a:	4a13      	ldr	r2, [pc, #76]	@ (80011b8 <AS608_RegModel+0x54>)
  800116c:	f107 0310 	add.w	r3, r7, #16
  8001170:	e892 0003 	ldmia.w	r2, {r0, r1}
  8001174:	6018      	str	r0, [r3, #0]
  8001176:	3304      	adds	r3, #4
  8001178:	8019      	strh	r1, [r3, #0]
-    uint8_t rxBuffer[12];
-    HAL_UART_Transmit(&huart1, (uint8_t*)"\xEF\x01\xFF\xFF\xFF\xFF", 6, 100);
+    uint8_t rxBuffer[12];  // Buffer chứa phản hồi
+    HAL_UART_Transmit(&huart1, (uint8_t*)"\xEF\x01\xFF\xFF\xFF\xFF", 6, 100);  // Gửi header
  800117a:	2364      	movs	r3, #100	@ 0x64
  800117c:	2206      	movs	r2, #6
  800117e:	490f      	ldr	r1, [pc, #60]	@ (80011bc <AS608_RegModel+0x58>)
  8001180:	480f      	ldr	r0, [pc, #60]	@ (80011c0 <AS608_RegModel+0x5c>)
  8001182:	f003 fc6d 	bl	8004a60 <HAL_UART_Transmit>
-    HAL_UART_Transmit(&huart1, cmd, sizeof(cmd), 100);
+    HAL_UART_Transmit(&huart1, cmd, sizeof(cmd), 100);  // Gửi lệnh
  8001186:	f107 0110 	add.w	r1, r7, #16
  800118a:	2364      	movs	r3, #100	@ 0x64
  800118c:	2206      	movs	r2, #6
  800118e:	480c      	ldr	r0, [pc, #48]	@ (80011c0 <AS608_RegModel+0x5c>)
  8001190:	f003 fc66 	bl	8004a60 <HAL_UART_Transmit>
-    if (HAL_UART_Receive(&huart1, rxBuffer, 12, 500) == HAL_OK) return rxBuffer[9];
+    if (HAL_UART_Receive(&huart1, rxBuffer, 12, 500) == HAL_OK) return rxBuffer[9];  // Nhận phản hồi
  8001194:	1d39      	adds	r1, r7, #4
  8001196:	f44f 73fa 	mov.w	r3, #500	@ 0x1f4
  800119a:	220c      	movs	r2, #12
@@ -2402,7 +2401,7 @@ uint8_t AS608_RegModel(void) {
  80011a6:	d101      	bne.n	80011ac <AS608_RegModel+0x48>
  80011a8:	7b7b      	ldrb	r3, [r7, #13]
  80011aa:	e000      	b.n	80011ae <AS608_RegModel+0x4a>
-    return 0xFF;
+    return 0xFF;  // Trả về lỗi
  80011ac:	23ff      	movs	r3, #255	@ 0xff
 }
  80011ae:	4618      	mov	r0, r3
@@ -2416,7 +2415,7 @@ uint8_t AS608_RegModel(void) {
 
 080011c4 <AS608_StoreChar>:
 
-uint8_t AS608_StoreChar(uint8_t bufferID, uint16_t pageID) {
+uint8_t AS608_StoreChar(uint8_t bufferID, uint16_t pageID) {  // Hàm lưu đặc trưng vân tay
  80011c4:	b580      	push	{r7, lr}
  80011c6:	b088      	sub	sp, #32
  80011c8:	af00      	add	r7, sp, #0
@@ -2439,7 +2438,7 @@ uint8_t AS608_StoreChar(uint8_t bufferID, uint16_t pageID) {
  80011e8:	b2db      	uxtb	r3, r3
  80011ea:	330d      	adds	r3, #13
  80011ec:	77fb      	strb	r3, [r7, #31]
-    uint8_t cmd[] = {0x01, 0x00, 0x06, 0x06, bufferID, (uint8_t)(pageID >> 8), (uint8_t)(pageID & 0xFF), 0x00, sum};
+    uint8_t cmd[] = {0x01, 0x00, 0x06, 0x06, bufferID, (uint8_t)(pageID >> 8), (uint8_t)(pageID & 0xFF), 0x00, sum};  // Lệnh lưu đặc trưng
  80011ee:	2301      	movs	r3, #1
  80011f0:	753b      	strb	r3, [r7, #20]
  80011f2:	2300      	movs	r3, #0
@@ -2462,20 +2461,20 @@ uint8_t AS608_StoreChar(uint8_t bufferID, uint16_t pageID) {
  8001214:	76fb      	strb	r3, [r7, #27]
  8001216:	7ffb      	ldrb	r3, [r7, #31]
  8001218:	773b      	strb	r3, [r7, #28]
-    uint8_t rxBuffer[12];
-    HAL_UART_Transmit(&huart1, (uint8_t*)"\xEF\x01\xFF\xFF\xFF\xFF", 6, 100);
+    uint8_t rxBuffer[12];  // Buffer chứa phản hồi
+    HAL_UART_Transmit(&huart1, (uint8_t*)"\xEF\x01\xFF\xFF\xFF\xFF", 6, 100);  // Gửi header
  800121a:	2364      	movs	r3, #100	@ 0x64
  800121c:	2206      	movs	r2, #6
  800121e:	490e      	ldr	r1, [pc, #56]	@ (8001258 <AS608_StoreChar+0x94>)
  8001220:	480e      	ldr	r0, [pc, #56]	@ (800125c <AS608_StoreChar+0x98>)
  8001222:	f003 fc1d 	bl	8004a60 <HAL_UART_Transmit>
-    HAL_UART_Transmit(&huart1, cmd, sizeof(cmd), 100);
+    HAL_UART_Transmit(&huart1, cmd, sizeof(cmd), 100);  // Gửi lệnh
  8001226:	f107 0114 	add.w	r1, r7, #20
  800122a:	2364      	movs	r3, #100	@ 0x64
  800122c:	2209      	movs	r2, #9
  800122e:	480b      	ldr	r0, [pc, #44]	@ (800125c <AS608_StoreChar+0x98>)
  8001230:	f003 fc16 	bl	8004a60 <HAL_UART_Transmit>
-    if (HAL_UART_Receive(&huart1, rxBuffer, 12, 500) == HAL_OK) return rxBuffer[9];
+    if (HAL_UART_Receive(&huart1, rxBuffer, 12, 500) == HAL_OK) return rxBuffer[9];  // Nhận phản hồi
  8001234:	f107 0108 	add.w	r1, r7, #8
  8001238:	f44f 73fa 	mov.w	r3, #500	@ 0x1f4
  800123c:	220c      	movs	r2, #12
@@ -2486,7 +2485,7 @@ uint8_t AS608_StoreChar(uint8_t bufferID, uint16_t pageID) {
  8001248:	d101      	bne.n	800124e <AS608_StoreChar+0x8a>
  800124a:	7c7b      	ldrb	r3, [r7, #17]
  800124c:	e000      	b.n	8001250 <AS608_StoreChar+0x8c>
-    return 0xFF;
+    return 0xFF;  // Trả về lỗi
  800124e:	23ff      	movs	r3, #255	@ 0xff
 }
  8001250:	4618      	mov	r0, r3
@@ -2498,20 +2497,20 @@ uint8_t AS608_StoreChar(uint8_t bufferID, uint16_t pageID) {
 
 08001260 <AS608_Enroll>:
 
-int AS608_Enroll(uint16_t id) {
+int AS608_Enroll(uint16_t id) {  // Hàm đăng ký vân tay
  8001260:	b580      	push	{r7, lr}
  8001262:	b082      	sub	sp, #8
  8001264:	af00      	add	r7, sp, #0
  8001266:	4603      	mov	r3, r0
  8001268:	80fb      	strh	r3, [r7, #6]
-    CLCD_I2C_Clear(&LCD1);
+    CLCD_I2C_Clear(&LCD1);  // Xóa màn hình
  800126a:	4835      	ldr	r0, [pc, #212]	@ (8001340 <AS608_Enroll+0xe0>)
  800126c:	f7ff f8cf 	bl	800040e <CLCD_I2C_Clear>
-    CLCD_I2C_WriteString(&LCD1, "DAT TAY LAN 1...");
+    CLCD_I2C_WriteString(&LCD1, "DAT TAY LAN 1...");  // Hiển thị thông báo
  8001270:	4934      	ldr	r1, [pc, #208]	@ (8001344 <AS608_Enroll+0xe4>)
  8001272:	4833      	ldr	r0, [pc, #204]	@ (8001340 <AS608_Enroll+0xe0>)
  8001274:	f7ff f8b4 	bl	80003e0 <CLCD_I2C_WriteString>
-    while (AS608_GetImage() != AS608_OK) { osDelay(100); }
+    while (AS608_GetImage() != AS608_OK) { osDelay(100); }  // Lấy hình ảnh
  8001278:	e002      	b.n	8001280 <AS608_Enroll+0x20>
  800127a:	2064      	movs	r0, #100	@ 0x64
  800127c:	f004 fbe2 	bl	8005a44 <osDelay>
@@ -2519,7 +2518,7 @@ int AS608_Enroll(uint16_t id) {
  8001284:	4603      	mov	r3, r0
  8001286:	2b00      	cmp	r3, #0
  8001288:	d1f7      	bne.n	800127a <AS608_Enroll+0x1a>
-    if (AS608_GenChar(1) != AS608_OK) return 0;
+    if (AS608_GenChar(1) != AS608_OK) return 0;  // Tạo đặc trưng
  800128a:	2001      	movs	r0, #1
  800128c:	f7ff fed6 	bl	800103c <AS608_GenChar>
  8001290:	4603      	mov	r3, r0
@@ -2528,14 +2527,14 @@ int AS608_Enroll(uint16_t id) {
  8001296:	2300      	movs	r3, #0
  8001298:	e04d      	b.n	8001336 <AS608_Enroll+0xd6>
 
-    CLCD_I2C_Clear(&LCD1);
+    CLCD_I2C_Clear(&LCD1);  // Xóa màn hình
  800129a:	4829      	ldr	r0, [pc, #164]	@ (8001340 <AS608_Enroll+0xe0>)
  800129c:	f7ff f8b7 	bl	800040e <CLCD_I2C_Clear>
-    CLCD_I2C_WriteString(&LCD1, "NHAC TAY RA...");
+    CLCD_I2C_WriteString(&LCD1, "NHAC TAY RA...");  // Hiển thị thông báo
  80012a0:	4929      	ldr	r1, [pc, #164]	@ (8001348 <AS608_Enroll+0xe8>)
  80012a2:	4827      	ldr	r0, [pc, #156]	@ (8001340 <AS608_Enroll+0xe0>)
  80012a4:	f7ff f89c 	bl	80003e0 <CLCD_I2C_WriteString>
-    while (AS608_GetImage() == AS608_OK) { osDelay(100); }
+    while (AS608_GetImage() == AS608_OK) { osDelay(100); }  // Lấy hình ảnh
  80012a8:	e002      	b.n	80012b0 <AS608_Enroll+0x50>
  80012aa:	2064      	movs	r0, #100	@ 0x64
  80012ac:	f004 fbca 	bl	8005a44 <osDelay>
@@ -2544,14 +2543,14 @@ int AS608_Enroll(uint16_t id) {
  80012b6:	2b00      	cmp	r3, #0
  80012b8:	d0f7      	beq.n	80012aa <AS608_Enroll+0x4a>
 
-    CLCD_I2C_Clear(&LCD1);
+    CLCD_I2C_Clear(&LCD1);  // Xóa màn hình
  80012ba:	4821      	ldr	r0, [pc, #132]	@ (8001340 <AS608_Enroll+0xe0>)
  80012bc:	f7ff f8a7 	bl	800040e <CLCD_I2C_Clear>
-    CLCD_I2C_WriteString(&LCD1, "DAT LAI LAN 2...");
+    CLCD_I2C_WriteString(&LCD1, "DAT LAI LAN 2...");  // Hiển thị thông báo
  80012c0:	4922      	ldr	r1, [pc, #136]	@ (800134c <AS608_Enroll+0xec>)
  80012c2:	481f      	ldr	r0, [pc, #124]	@ (8001340 <AS608_Enroll+0xe0>)
  80012c4:	f7ff f88c 	bl	80003e0 <CLCD_I2C_WriteString>
-    while (AS608_GetImage() != AS608_OK) { osDelay(100); }
+    while (AS608_GetImage() != AS608_OK) { osDelay(100); }  // Lấy hình ảnh
  80012c8:	e002      	b.n	80012d0 <AS608_Enroll+0x70>
  80012ca:	2064      	movs	r0, #100	@ 0x64
  80012cc:	f004 fbba 	bl	8005a44 <osDelay>
@@ -2559,7 +2558,7 @@ int AS608_Enroll(uint16_t id) {
  80012d4:	4603      	mov	r3, r0
  80012d6:	2b00      	cmp	r3, #0
  80012d8:	d1f7      	bne.n	80012ca <AS608_Enroll+0x6a>
-    if (AS608_GenChar(2) != AS608_OK) return 0;
+    if (AS608_GenChar(2) != AS608_OK) return 0;  // Tạo đặc trưng
  80012da:	2002      	movs	r0, #2
  80012dc:	f7ff feae 	bl	800103c <AS608_GenChar>
  80012e0:	4603      	mov	r3, r0
@@ -2568,7 +2567,7 @@ int AS608_Enroll(uint16_t id) {
  80012e6:	2300      	movs	r3, #0
  80012e8:	e025      	b.n	8001336 <AS608_Enroll+0xd6>
 
-    if (AS608_RegModel() != AS608_OK || AS608_StoreChar(1, id) != AS608_OK) {
+    if (AS608_RegModel() != AS608_OK || AS608_StoreChar(1, id) != AS608_OK) {  // Đăng ký và lưu đặc trưng
  80012ea:	f7ff ff3b 	bl	8001164 <AS608_RegModel>
  80012ee:	4603      	mov	r3, r0
  80012f0:	2b00      	cmp	r3, #0
@@ -2580,10 +2579,10 @@ int AS608_Enroll(uint16_t id) {
  80012fe:	4603      	mov	r3, r0
  8001300:	2b00      	cmp	r3, #0
  8001302:	d00c      	beq.n	800131e <AS608_Enroll+0xbe>
-        CLCD_I2C_Clear(&LCD1);
+        CLCD_I2C_Clear(&LCD1);  // Xóa màn hình
  8001304:	480e      	ldr	r0, [pc, #56]	@ (8001340 <AS608_Enroll+0xe0>)
  8001306:	f7ff f882 	bl	800040e <CLCD_I2C_Clear>
-        CLCD_I2C_WriteString(&LCD1, "LOI LUU TRU!");
+        CLCD_I2C_WriteString(&LCD1, "LOI LUU TRU!");  // Hiển thị thông báo
  800130a:	4911      	ldr	r1, [pc, #68]	@ (8001350 <AS608_Enroll+0xf0>)
  800130c:	480c      	ldr	r0, [pc, #48]	@ (8001340 <AS608_Enroll+0xe0>)
  800130e:	f7ff f867 	bl	80003e0 <CLCD_I2C_WriteString>
@@ -2594,17 +2593,17 @@ int AS608_Enroll(uint16_t id) {
  800131a:	2300      	movs	r3, #0
  800131c:	e00b      	b.n	8001336 <AS608_Enroll+0xd6>
     }
-    CLCD_I2C_Clear(&LCD1);
+    CLCD_I2C_Clear(&LCD1);  // Xóa màn hình
  800131e:	4808      	ldr	r0, [pc, #32]	@ (8001340 <AS608_Enroll+0xe0>)
  8001320:	f7ff f875 	bl	800040e <CLCD_I2C_Clear>
-    CLCD_I2C_WriteString(&LCD1, "DANG KY OK!");
+    CLCD_I2C_WriteString(&LCD1, "DANG KY OK!");   // Hiển thị thông báo    
  8001324:	490b      	ldr	r1, [pc, #44]	@ (8001354 <AS608_Enroll+0xf4>)
  8001326:	4806      	ldr	r0, [pc, #24]	@ (8001340 <AS608_Enroll+0xe0>)
  8001328:	f7ff f85a 	bl	80003e0 <CLCD_I2C_WriteString>
-    osDelay(2000);
+    osDelay(2000); 
  800132c:	f44f 60fa 	mov.w	r0, #2000	@ 0x7d0
  8001330:	f004 fb88 	bl	8005a44 <osDelay>
-    return 1;
+    return 1;  // Trả về thành công
  8001334:	2301      	movs	r3, #1
 }
  8001336:	4618      	mov	r0, r3
@@ -2621,14 +2620,14 @@ int AS608_Enroll(uint16_t id) {
 
 08001358 <AS608_DeleteChar>:
 
-// --- HÀM MỚI: XÓA VÂN TAY TRONG FLASH CỦA CẢM BIẾN ---
-uint8_t AS608_DeleteChar(uint16_t pageID) {
+
+uint8_t AS608_DeleteChar(uint16_t pageID) {  // Hàm xóa vân tay
  8001358:	b580      	push	{r7, lr}
  800135a:	b088      	sub	sp, #32
  800135c:	af00      	add	r7, sp, #0
  800135e:	4603      	mov	r3, r0
  8001360:	80fb      	strh	r3, [r7, #6]
-    uint8_t sum = 0x01 + 0x00 + 0x07 + 0x0C + (pageID >> 8) + (pageID & 0xFF) + 0x00 + 0x01;
+    uint8_t sum = 0x01 + 0x00 + 0x07 + 0x0C + (pageID >> 8) + (pageID & 0xFF) + 0x00 + 0x01;  // Tính tổng kiểm tra
  8001362:	88fb      	ldrh	r3, [r7, #6]
  8001364:	0a1b      	lsrs	r3, r3, #8
  8001366:	b29b      	uxth	r3, r3
@@ -2639,7 +2638,7 @@ uint8_t AS608_DeleteChar(uint16_t pageID) {
  8001370:	b2db      	uxtb	r3, r3
  8001372:	3315      	adds	r3, #21
  8001374:	77fb      	strb	r3, [r7, #31]
-    uint8_t cmd[] = {0x01, 0x00, 0x07, 0x0C, (uint8_t)(pageID >> 8), (uint8_t)(pageID & 0xFF), 0x00, 0x01, sum};
+    uint8_t cmd[] = {0x01, 0x00, 0x07, 0x0C, (uint8_t)(pageID >> 8), (uint8_t)(pageID & 0xFF), 0x00, 0x01, sum};  // Lệnh xóa vân tay
  8001376:	2301      	movs	r3, #1
  8001378:	753b      	strb	r3, [r7, #20]
  800137a:	2300      	movs	r3, #0
@@ -2662,20 +2661,20 @@ uint8_t AS608_DeleteChar(uint16_t pageID) {
  800139c:	76fb      	strb	r3, [r7, #27]
  800139e:	7ffb      	ldrb	r3, [r7, #31]
  80013a0:	773b      	strb	r3, [r7, #28]
-    uint8_t rxBuffer[12];
-    HAL_UART_Transmit(&huart1, (uint8_t*)"\xEF\x01\xFF\xFF\xFF\xFF", 6, 100);
+    uint8_t rxBuffer[12];  // Buffer chứa phản hồi
+    HAL_UART_Transmit(&huart1, (uint8_t*)"\xEF\x01\xFF\xFF\xFF\xFF", 6, 100);  // Gửi header
  80013a2:	2364      	movs	r3, #100	@ 0x64
  80013a4:	2206      	movs	r2, #6
  80013a6:	490e      	ldr	r1, [pc, #56]	@ (80013e0 <AS608_DeleteChar+0x88>)
  80013a8:	480e      	ldr	r0, [pc, #56]	@ (80013e4 <AS608_DeleteChar+0x8c>)
  80013aa:	f003 fb59 	bl	8004a60 <HAL_UART_Transmit>
-    HAL_UART_Transmit(&huart1, cmd, sizeof(cmd), 100);
+    HAL_UART_Transmit(&huart1, cmd, sizeof(cmd), 100);  // Gửi lệnh
  80013ae:	f107 0114 	add.w	r1, r7, #20
  80013b2:	2364      	movs	r3, #100	@ 0x64
  80013b4:	2209      	movs	r2, #9
  80013b6:	480b      	ldr	r0, [pc, #44]	@ (80013e4 <AS608_DeleteChar+0x8c>)
  80013b8:	f003 fb52 	bl	8004a60 <HAL_UART_Transmit>
-    if (HAL_UART_Receive(&huart1, rxBuffer, 12, 500) == HAL_OK) return rxBuffer[9];
+    if (HAL_UART_Receive(&huart1, rxBuffer, 12, 500) == HAL_OK) return rxBuffer[9];  // Nhận phản hồi
  80013bc:	f107 0108 	add.w	r1, r7, #8
  80013c0:	f44f 73fa 	mov.w	r3, #500	@ 0x1f4
  80013c4:	220c      	movs	r2, #12
@@ -2686,7 +2685,7 @@ uint8_t AS608_DeleteChar(uint16_t pageID) {
  80013d0:	d101      	bne.n	80013d6 <AS608_DeleteChar+0x7e>
  80013d2:	7c7b      	ldrb	r3, [r7, #17]
  80013d4:	e000      	b.n	80013d8 <AS608_DeleteChar+0x80>
-    return 0xFF;
+    return 0xFF;  // Trả về lỗi
  80013d6:	23ff      	movs	r3, #255	@ 0xff
 }
  80013d8:	4618      	mov	r0, r3
@@ -2907,22 +2906,21 @@ int main(void)
   MX_USART2_UART_Init();
  8001524:	f000 f92c 	bl	8001780 <MX_USART2_UART_Init>
   /* USER CODE BEGIN 2 */
-  // Khởi tạo PWM cho Servo để chốt cửa ở trạng thái đóng khi vừa cấp điện
-  Servo_Init();
+  Servo_Init();  // Khởi tạo PWM cho Servo để chốt cửa ở trạng thái đóng khi vừa cấp điện
  8001528:	f000 f9e2 	bl	80018f0 <Servo_Init>
 
 
   /* USER CODE END 2 */
 
   /* Init scheduler */
-  osKernelInitialize();
+  osKernelInitialize();  // Khởi tạo scheduler
  800152c:	f004 f98e 	bl	800584c <osKernelInitialize>
   /* add queues, ... */
   /* USER CODE END RTOS_QUEUES */
 
   /* Create the thread(s) */
   /* creation of defaultTask */
-  defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
+  defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);  // Tạo task mặc định
  8001530:	4a06      	ldr	r2, [pc, #24]	@ (800154c <main+0x44>)
  8001532:	2100      	movs	r1, #0
  8001534:	4806      	ldr	r0, [pc, #24]	@ (8001550 <main+0x48>)
@@ -2935,14 +2933,14 @@ int main(void)
    * Việc khởi tạo LCD sẽ được thực hiện bên trong Task_Auth để đảm bảo
    * an toàn trong môi trường đa nhiệm.
    */
-  App_Init_FreeRTOS();
+  App_Init_FreeRTOS();  // Khởi tạo Mutex, Queue và các Task
  8001540:	f7ff f8d6 	bl	80006f0 <App_Init_FreeRTOS>
   /* USER CODE BEGIN RTOS_EVENTS */
   /* add events, ... */
   /* USER CODE END RTOS_EVENTS */
 
   /* Start scheduler */
-  osKernelStart();
+  osKernelStart();  // Khởi động scheduler
  8001544:	f004 f9c6 	bl	80058d4 <osKernelStart>
 
   /* We should never get here as control is now taken by the scheduler */

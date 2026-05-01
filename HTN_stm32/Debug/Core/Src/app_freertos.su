@@ -4,8 +4,8 @@
 ../Core/Src/app_freertos.c:95:6:LCD_Clear	8	static
 ../Core/Src/app_freertos.c:102:6:HAL_UART_RxCpltCallback	40	static
 ../Core/Src/app_freertos.c:142:6:App_Init_FreeRTOS	192	static
-../Core/Src/app_freertos.c:165:6:Buzzer_Fail	8	static
-../Core/Src/app_freertos.c:177:6:Task_Input	32	static
-../Core/Src/app_freertos.c:215:6:Task_Auth	128	static
-../Core/Src/app_freertos.c:419:6:AutoLock_Callback	24	static
-../Core/Src/app_freertos.c:427:6:Task_Buzzer	16	static
+../Core/Src/app_freertos.c:166:6:Buzzer_Fail	8	static
+../Core/Src/app_freertos.c:179:6:Task_Input	32	static
+../Core/Src/app_freertos.c:217:6:Task_Auth	144	static
+../Core/Src/app_freertos.c:418:6:AutoLock_Callback	24	static
+../Core/Src/app_freertos.c:426:6:Task_Buzzer	16	static

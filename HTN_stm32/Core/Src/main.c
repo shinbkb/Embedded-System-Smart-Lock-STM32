@@ -42,10 +42,10 @@ UART_HandleTypeDef huart2;
 
 /* Definitions for defaultTask */
 osThreadId_t defaultTaskHandle;
-const osThreadAttr_t defaultTask_attributes = {
-  .name = "defaultTask",
-  .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityNormal,
+const osThreadAttr_t defaultTask_attributes = {   // Định nghĩa task mặc định
+  .name = "defaultTask",   // Tên task
+  .stack_size = 128 * 4,   // Kích thước stack
+  .priority = (osPriority_t) osPriorityNormal,  // Độ ưu tiên
 };
 /* USER CODE BEGIN PV */
 
@@ -58,7 +58,7 @@ static void MX_I2C1_Init(void);
 static void MX_TIM2_Init(void);
 static void MX_USART1_UART_Init(void);
 static void MX_USART2_UART_Init(void);
-void StartDefaultTask(void *argument);
+void StartDefaultTask(void *argument);  // Hàm khởi tạo task mặc định
 
 /* USER CODE BEGIN PFP */
 
@@ -103,14 +103,13 @@ int main(void)
   MX_USART1_UART_Init();
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
-  // Khởi tạo PWM cho Servo để chốt cửa ở trạng thái đóng khi vừa cấp điện
-  Servo_Init();
+  Servo_Init();  // Khởi tạo PWM cho Servo để chốt cửa ở trạng thái đóng khi vừa cấp điện
 
 
   /* USER CODE END 2 */
 
   /* Init scheduler */
-  osKernelInitialize();
+  osKernelInitialize();  // Khởi tạo scheduler
 
   /* USER CODE BEGIN RTOS_MUTEX */
   /* add mutexes, ... */
@@ -130,7 +129,7 @@ int main(void)
 
   /* Create the thread(s) */
   /* creation of defaultTask */
-  defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
+  defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);  // Tạo task mặc định
 
   /* USER CODE BEGIN RTOS_THREADS */
   /**
@@ -138,7 +137,7 @@ int main(void)
    * Việc khởi tạo LCD sẽ được thực hiện bên trong Task_Auth để đảm bảo
    * an toàn trong môi trường đa nhiệm.
    */
-  App_Init_FreeRTOS();
+  App_Init_FreeRTOS();  // Khởi tạo Mutex, Queue và các Task
   /* USER CODE END RTOS_THREADS */
 
   /* USER CODE BEGIN RTOS_EVENTS */
@@ -146,7 +145,7 @@ int main(void)
   /* USER CODE END RTOS_EVENTS */
 
   /* Start scheduler */
-  osKernelStart();
+  osKernelStart();  // Khởi động scheduler
 
   /* We should never get here as control is now taken by the scheduler */
 
